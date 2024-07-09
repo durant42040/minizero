@@ -52,6 +52,11 @@ typedef minizero::env::puzzle2048::Puzzle2048EnvLoader EnvironmentLoader;
 typedef minizero::env::rubiks::RubiksAction Action;
 typedef minizero::env::rubiks::RubiksEnv Environment;
 typedef minizero::env::rubiks::RubiksEnvLoader EnvironmentLoader;
+#elif CHESS
+#include "chess.h"
+typedef minizero::env::chess::ChessAction Action;
+typedef minizero::env::chess::ChessEnv Environment;
+typedef minizero::env::chess::ChessEnvLoader EnvironmentLoader;
 #else
 #include "tictactoe.h"
 typedef minizero::env::tictactoe::TicTacToeAction Action;

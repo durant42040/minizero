@@ -165,17 +165,25 @@ void ModeHandler::runZeroTrainingName()
 void ModeHandler::runEnvTest()
 {
     Environment env;
-    env.reset();
-    while (!env.isTerminal()) {
-        std::vector<Action> legal_actions = env.getLegalActions();
-        int index = utils::Random::randInt() % legal_actions.size();
-        env.act(legal_actions[index]);
+    for (int i = 0; i < 4672; i++) {
+        Action action(i, env::Player::kPlayer1);
+        if (action.toConsoleString() != "") {
+            std::cout << action.toConsoleString() << std::endl;
+        }
     }
-    std::cout << env.toString() << std::endl;
 
-    EnvironmentLoader env_loader;
-    env_loader.loadFromEnvironment(env);
-    std::cout << env_loader.toString() << std::endl;
+    //    env.reset();
+    //    while (!env.isTerminal()) {
+    //        std::vector<Action> legal_actions = env.getLegalActions();
+    //        int index = utils::Random::randInt() % legal_actions.size();
+    //        env.act(legal_actions[index]);
+    //        break;
+    //    }
+    //    std::cout << env.toString() << std::endl;
+    //
+    //    EnvironmentLoader env_loader;
+    //    env_loader.loadFromEnvironment(env);
+    //    std::cout << env_loader.toString() << std::endl;
 }
 
 void ModeHandler::runRemoveObs()
