@@ -2,9 +2,9 @@
 
 #include "base_env.h"
 #include <string>
+#include <unordered_map>
 #include <utility>
 #include <vector>
-#include <unordered_map>
 
 namespace minizero::env::chess {
 
@@ -15,7 +15,6 @@ const int kMovePerSquare = 73;
 const int kChessPieces = 12;
 extern std::vector<std::string> kChessActionName;
 extern std::unordered_map<std::string, int> kChessActionMap;
-
 
 const std::string kChessPositions[] = {
     "a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8",
@@ -54,7 +53,6 @@ class ChessEnv : public BaseBoardEnv<ChessAction> {
 public:
     ChessEnv() : BaseBoardEnv<ChessAction>(kChessBoardSize)
     {
-
     }
 
     void reset() override;

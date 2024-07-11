@@ -16,7 +16,7 @@ void initialize()
     }
 
     // check if the mapping is correct
-    for(std::size_t i = 0; i < kChessActionName.size(); i++) {
+    for (std::size_t i = 0; i < kChessActionName.size(); i++) {
         ChessAction action({kChessActionName[i]});
         assert(static_cast<int>(i) == action.getActionID());
     }
@@ -79,8 +79,8 @@ void generateActionString(int action_id)
         }
     } else if (move_id < 73) {
         // promotion
-        if(start_rank != 6) return;
-        const int direction = (move_id - 64) / 3;  // 0: up-left, 1: up, 2: up-right
+        if (start_rank != 6) return;
+        const int direction = (move_id - 64) / 3; // 0: up-left, 1: up, 2: up-right
 
         const std::string promotion_pieces = "rbn";
         promotion = promotion_pieces[(move_id - 64) % 3]; // 0: rook, 1: bishop, 2: knight
