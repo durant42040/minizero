@@ -1,148 +1,187 @@
 #include "chess.h"
 #include <iostream>
+#include <string>
 #include <vector>
 
 namespace minizero::env::chess {
 
-    ChessAction::ChessAction(const std::vector <std::string> &action_string_args) {
-        // split string into first two characters and last two characters
-        assert(action_string_args.size() && action_string_args[0].size());
-        const std::string action = action_string_args[0];
+std::vector<std::string> kChessActionName;
+std::unordered_map<std::string, int> kChessActionMap;
 
-        const std::string start_pos = action.substr(0, 2);
-        const std::string end_pos = action.substr(2, 2);
-        const char promotion = (action.size() > 4) ? action[4] : 0;
-
-        //    const int start_square = kChessPositions.find(start_pos);
-        //    const int end_square = kChessPositions.find(end_pos);
+void initialize()
+{
+    // compute action string and id mapping
+    for (int i = 0; i < kMovePerSquare * kChessBoardSize * kChessBoardSize; i++) {
+        generateActionString(i);
     }
 
-    std::string ChessAction::toConsoleString() const {
-        // action id is encoded into numeric notation
-        std::string action_string;
-        int promotion = 0;
+    // check if the mapping is correct
+    for(std::size_t i = 0; i < kChessActionName.size(); i++) {
+        ChessAction action({kChessActionName[i]});
+        assert(static_cast<int>(i) == action.getActionID());
+    }
+}
 
-        const int start_square = action_id_ / kMovePerSquare;
-        const int start_rank = start_square / kChessBoardSize;
-        const int start_file = start_square % kChessBoardSize;
+ChessAction::ChessAction(const std::vector<std::string>& action_string_args)
+{
+    // construct action from action string
+    assert(action_string_args.size() && action_string_args[0].size());
+    const std::string action_string = action_string_args[0];
+    action_id_ = kChessActionMap[action_string];
+}
 
-        int end_file = start_file;
-        int end_rank = start_rank;
+void generateActionString(int action_id)
+{
+    std::string action_string;
+    char promotion = '\0';
 
-        const int move_id = action_id_ % kMovePerSquare;
+    const int start_square = action_id / kMovePerSquare;
+    const int start_rank = start_square / kChessBoardSize;
+    const int start_file = start_square % kChessBoardSize;
 
-        if (move_id < 56) {
-            // queen moves
-            const int direction = move_id / 7;    // 0: N, 1: NE, 2: E, 3: SE, 4: S, 5: SW, 6: W, 7: NW
-            const int distance = move_id % 7 + 1; // 1~7
-            end_file += distance * ((direction % 4 == 0) ? 0 : ((direction > 4) ? -1 : 1));
-            end_rank += distance * ((direction % 4 == 2) ? 0 : ((direction > 2 && direction < 6) ? -1 : 1));
-        } else if (move_id < 64) {
-            // knight moves
-            if (move_id == 56) {
-                end_file += 1;
-                end_rank += 2;
-            } else if (move_id == 57) {
-                end_file += 2;
-                end_rank += 1;
-            } else if (move_id == 58) {
-                end_file += 2;
-                end_rank -= 1;
-            } else if (move_id == 59) {
-                end_file += 1;
-                end_rank -= 2;
-            } else if (move_id == 60) {
-                end_file -= 1;
-                end_rank -= 2;
-            } else if (move_id == 61) {
-                end_file -= 2;
-                end_rank -= 1;
-            } else if (move_id == 62) {
-                end_file -= 2;
-                end_rank += 1;
-            } else {
-                end_file -= 1;
-                end_rank += 2;
-            }
-        } else if (move_id < 73) {
-            // promotion
-            const int direction = (move_id - 64) / 3;  // 0: up-left, 1: up, 2: up-right
-            promotion = (move_id - 64) % 3 + 1;        // 1: rook, 2: bishop, 3: queen
-            end_file = end_file - 1 + direction;
+    int end_file = start_file;
+    int end_rank = start_rank;
+
+    const int move_id = action_id % kMovePerSquare;
+
+    if (move_id < 56) {
+        // queen moves
+        const int direction = move_id / 7;    // 0: N, 1: NE, 2: E, 3: SE, 4: S, 5: SW, 6: W, 7: NW
+        const int distance = move_id % 7 + 1; // 1~7
+        end_file += distance * ((direction % 4 == 0) ? 0 : ((direction > 4) ? -1 : 1));
+        end_rank += distance * ((direction % 4 == 2) ? 0 : ((direction > 2 && direction < 6) ? -1 : 1));
+    } else if (move_id < 64) {
+        // knight moves
+        if (move_id == 56) {
+            end_file += 1;
+            end_rank += 2;
+        } else if (move_id == 57) {
+            end_file += 2;
             end_rank += 1;
-            // TODO: Consider promotion to queen
+        } else if (move_id == 58) {
+            end_file += 2;
+            end_rank -= 1;
+        } else if (move_id == 59) {
+            end_file += 1;
+            end_rank -= 2;
+        } else if (move_id == 60) {
+            end_file -= 1;
+            end_rank -= 2;
+        } else if (move_id == 61) {
+            end_file -= 2;
+            end_rank -= 1;
+        } else if (move_id == 62) {
+            end_file -= 2;
+            end_rank += 1;
         } else {
-            std::cerr << "Invalid Move";
+            end_file -= 1;
+            end_rank += 2;
         }
+    } else if (move_id < 73) {
+        // promotion
+        if(start_rank != 6) return;
+        const int direction = (move_id - 64) / 3;  // 0: up-left, 1: up, 2: up-right
 
-        const int end_square = end_rank * kChessBoardSize + end_file;
-        if (end_square < 0 || end_square >= kChessBoardSize * kChessBoardSize) {
-            return "";
-        }
+        const std::string promotion_pieces = "rbn";
+        promotion = promotion_pieces[(move_id - 64) % 3]; // 0: rook, 1: bishop, 2: knight
 
-        // action_string: "a1b1", action may be invalid
-        action_string = kChessPositions[start_square] + kChessPositions[end_square] +
-                        ((promotion == 0) ? "" : std::to_string(promotion));
+        end_file = end_file - 1 + direction;
+        end_rank += 1;
 
-        return action_string;
+    } else {
+        std::cerr << "Invalid Move";
     }
 
-    void ChessEnv::reset() {
-        std::cout << "resetting..." << std::endl;
+    // check bounds
+    if (end_rank < 0 || end_rank > 7 || end_file < 0 || end_file > 7) return;
+
+    // promotion to queen by default
+    if (promotion == '\0' && start_rank == 6 && end_rank == 7 && abs(end_file - start_file) <= 1) {
+        promotion = 'q';
     }
 
-    bool ChessEnv::act(const ChessAction &action) {
-        std::cout << "acting..." << std::endl;
-        return false;
-    }
+    const int end_square = end_rank * kChessBoardSize + end_file;
 
-    bool ChessEnv::act(const std::vector <std::string> &action_string_args) {
-        std::cout << "acting..." << std::endl;
-        return false;
-    }
+    // action_string: "a1b1" or "g7h7q"
+    action_string = kChessPositions[start_square] + kChessPositions[end_square] + promotion;
 
-    std::vector <ChessAction> ChessEnv::getLegalActions() const {
-        std::cout << "getting legal actions..." << std::endl;
-        return {ChessAction()};
-    }
+    kChessActionName.push_back(action_string);
+    kChessActionMap[action_string] = kChessActionName.size() - 1;
+}
 
-    bool ChessEnv::isLegalAction(const ChessAction &action) const {
-        std::cout << "checking if action is legal..." << std::endl;
-        return true;
-    }
+std::string ChessAction::toConsoleString() const
+{
+    return kChessActionName[action_id_];
+}
 
-    bool ChessEnv::isTerminal() const {
-        std::cout << "checking if terminal..." << std::endl;
-        return false;
-    }
+void ChessEnv::reset()
+{
+    std::cout << "resetting..." << std::endl;
+}
 
-    float ChessEnv::getEvalScore(bool is_resign) const {
-        std::cout << "getting eval score..." << std::endl;
-        return 1.0f;
-    }
+bool ChessEnv::act(const ChessAction& action)
+{
+    std::cout << "acting..." << std::endl;
+    return false;
+}
 
-    std::string ChessEnv::toString() const {
-        return "env.toString()";
-    }
+bool ChessEnv::act(const std::vector<std::string>& action_string_args)
+{
+    std::cout << "acting..." << std::endl;
+    return false;
+}
 
-    std::vector<float> ChessEnv::getFeatures(utils::Rotation rotation) const {
-        std::cout << "getting features..." << std::endl;
-        return {};
-    }
+std::vector<ChessAction> ChessEnv::getLegalActions() const
+{
+    std::cout << "getting legal actions..." << std::endl;
+    return {ChessAction()};
+}
 
-    std::vector<float> ChessEnv::getActionFeatures(const ChessAction &action, utils::Rotation rotation) const {
-        std::cout << "getting action features..." << std::endl;
-        return {};
-    }
+bool ChessEnv::isLegalAction(const ChessAction& action) const
+{
+    std::cout << "checking if action is legal..." << std::endl;
+    return true;
+}
 
-    std::vector<float> ChessEnvLoader::getFeatures(const int pos, utils::Rotation rotation) const {
-        std::cout << "getting features..." << std::endl;
-        return {};
-    }
+bool ChessEnv::isTerminal() const
+{
+    std::cout << "checking if terminal..." << std::endl;
+    return false;
+}
 
-    std::vector<float> ChessEnvLoader::getActionFeatures(const int pos, utils::Rotation rotation) const {
-        std::cout << "getting action features..." << std::endl;
-        return {};
-    }
+float ChessEnv::getEvalScore(bool is_resign) const
+{
+    std::cout << "getting eval score..." << std::endl;
+    return 1.0f;
+}
+
+std::string ChessEnv::toString() const
+{
+    return "env.toString()";
+}
+
+std::vector<float> ChessEnv::getFeatures(utils::Rotation rotation) const
+{
+    std::cout << "getting features..." << std::endl;
+    return {};
+}
+
+std::vector<float> ChessEnv::getActionFeatures(const ChessAction& action, utils::Rotation rotation) const
+{
+    std::cout << "getting action features..." << std::endl;
+    return {};
+}
+
+std::vector<float> ChessEnvLoader::getFeatures(const int pos, utils::Rotation rotation) const
+{
+    std::cout << "getting features..." << std::endl;
+    return {};
+}
+
+std::vector<float> ChessEnvLoader::getActionFeatures(const int pos, utils::Rotation rotation) const
+{
+    std::cout << "getting action features..." << std::endl;
+    return {};
+}
 
 } // namespace minizero::env::chess

@@ -164,26 +164,27 @@ void ModeHandler::runZeroTrainingName()
 
 void ModeHandler::runEnvTest()
 {
+    std::cout << "running environment test..." << std::endl;
     Environment env;
-    for (int i = 0; i < 4672; i++) {
-        Action action(i, env::Player::kPlayer1);
-        if (action.toConsoleString() != "") {
-            std::cout << action.toConsoleString() << std::endl;
-        }
-    }
+//    for(std::size_t i = 0; i < minizero::env::chess::kChessActionName.size(); i++) {
+//        Action action(i, env::Player::kPlayer1);
+//        std::cout << action.toConsoleString() << std::endl;
+//    }
+//
+//    std::cout << "environment test done." << std::endl;
 
-    //    env.reset();
-    //    while (!env.isTerminal()) {
-    //        std::vector<Action> legal_actions = env.getLegalActions();
-    //        int index = utils::Random::randInt() % legal_actions.size();
-    //        env.act(legal_actions[index]);
-    //        break;
-    //    }
-    //    std::cout << env.toString() << std::endl;
-    //
-    //    EnvironmentLoader env_loader;
-    //    env_loader.loadFromEnvironment(env);
-    //    std::cout << env_loader.toString() << std::endl;
+        env.reset();
+        while (!env.isTerminal()) {
+            std::vector<Action> legal_actions = env.getLegalActions();
+            int index = utils::Random::randInt() % legal_actions.size();
+            env.act(legal_actions[index]);
+            break;
+        }
+        std::cout << env.toString() << std::endl;
+
+        EnvironmentLoader env_loader;
+        env_loader.loadFromEnvironment(env);
+        std::cout << env_loader.toString() << std::endl;
 }
 
 void ModeHandler::runRemoveObs()

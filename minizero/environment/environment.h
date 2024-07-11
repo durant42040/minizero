@@ -72,6 +72,10 @@ inline void setUpEnv()
     go::initialize();
 #endif
 
+#if CHESS
+    chess::initialize();
+#endif
+
 #if KILLALLGO
     killallgo::initialize();
 #endif

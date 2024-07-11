@@ -1,6 +1,10 @@
 #pragma once
 
 #include "base_env.h"
+#include <string>
+#include <utility>
+#include <vector>
+#include <unordered_map>
 
 namespace minizero::env::chess {
 
@@ -9,6 +13,9 @@ const int kChessNumPlayer = 2;
 const int kChessBoardSize = 8;
 const int kMovePerSquare = 73;
 const int kChessPieces = 12;
+extern std::vector<std::string> kChessActionName;
+extern std::unordered_map<std::string, int> kChessActionMap;
+
 
 const std::string kChessPositions[] = {
     "a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8",
@@ -18,8 +25,7 @@ const std::string kChessPositions[] = {
     "e1", "e2", "e3", "e4", "e5", "e6", "e7", "e8",
     "f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8",
     "g1", "g2", "g3", "g4", "g5", "g6", "g7", "g8",
-    "h1", "h2", "h3", "h4", "h5", "h6", "h7", "h8"
-};
+    "h1", "h2", "h3", "h4", "h5", "h6", "h7", "h8"};
 
 //      CHESSBOARD
 // 8 56 57 58 59 60 61 62 63
@@ -31,6 +37,9 @@ const std::string kChessPositions[] = {
 // 2 8  9  10 11 12 13 14 15
 // 1 0  1  2  3  4  5  6  7
 //   a  b  c  d  e  f  g  h
+
+void initialize();
+void generateActionString(int action_id);
 
 class ChessAction : public BaseAction {
 public:
@@ -45,7 +54,7 @@ class ChessEnv : public BaseBoardEnv<ChessAction> {
 public:
     ChessEnv() : BaseBoardEnv<ChessAction>(kChessBoardSize)
     {
-        reset();
+
     }
 
     void reset() override;
