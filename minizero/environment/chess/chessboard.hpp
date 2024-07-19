@@ -1,7 +1,7 @@
 #pragma once
 
-#include "bitboard.hpp"
 #include "base_env.h"
+#include "bitboard.hpp"
 #include <iostream>
 #include <string>
 #include <vector>
@@ -21,14 +21,15 @@ public:
           rooks_(kRookStartPos),
           queens_(kQueenStartPos),
           kings_(kKingStartPos)
-          {
-          }
+    {
+    }
 
     std::string toString(Bitboard bitboard = 0) const;
     bool act(Square from, Square to);
     Bitboard generateMoves(Square square) const;
-    Bitboard ourPieces() const {
-        return player_ == Player::kPlayer1? white_pieces_ : black_pieces_;
+    Bitboard ourPieces() const
+    {
+        return player_ == Player::kPlayer1 ? white_pieces_ : black_pieces_;
     }
 
     Player player_;

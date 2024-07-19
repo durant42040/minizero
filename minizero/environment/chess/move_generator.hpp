@@ -1,7 +1,7 @@
 #pragma once
 
-#include "square.hpp"
 #include "bitboard.hpp"
+#include "square.hpp"
 namespace minizero::env::chess {
 
 extern const Bitboard kWhitePawnCaptures[64];
@@ -23,5 +23,4 @@ Bitboard generateBishopMoves(Square from, Bitboard all_pieces);
 
 Bitboard generateQueenMoves(Square from, Bitboard all_pieces);
 
-}
-
+} // namespace minizero::env::chess

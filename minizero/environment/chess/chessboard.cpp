@@ -1,5 +1,5 @@
-#include "bitboard.hpp"
 #include "chessboard.hpp"
+#include "bitboard.hpp"
 #include "move_generator.hpp"
 
 #include <algorithm>
@@ -7,7 +7,8 @@
 
 namespace minizero::env::chess {
 
-std::string ChessBoard::toString(Bitboard bitboard) const {
+std::string ChessBoard::toString(Bitboard bitboard) const
+{
     std::string board; // Initialize an empty board with dots
 
     for (int i = 0; i < 64; i++) {
@@ -30,7 +31,7 @@ std::string ChessBoard::toString(Bitboard bitboard) const {
             // convert last char to uppercase
             board.back() -= 32;
         }
-        if(bitboard.get(i)) {
+        if (bitboard.get(i)) {
             board.back() = 'X';
         }
         if (i % 8 == 7) {
@@ -48,7 +49,8 @@ std::string ChessBoard::toString(Bitboard bitboard) const {
     return result;
 }
 
-bool ChessBoard::act(Square from, Square to) {
+bool ChessBoard::act(Square from, Square to)
+{
     pawns_.update(from, to);
     knights_.update(from, to);
     bishops_.update(from, to);
@@ -64,13 +66,14 @@ bool ChessBoard::act(Square from, Square to) {
     return true;
 }
 
-Bitboard ChessBoard::generateMoves(Square from) const {
+Bitboard ChessBoard::generateMoves(Square from) const
+{
     Bitboard moves(0);
 
     if (pawns_.get(from)) {
-        if(player_ == Player::kPlayer1) {
+        if (player_ == Player::kPlayer1) {
             moves = generateWhitePawnMoves(from, all_pieces_, black_pieces_);
-        } else if (player_ == Player::kPlayer2){
+        } else if (player_ == Player::kPlayer2) {
             moves = generateBlackPawnMoves(from, all_pieces_, white_pieces_);
         }
     } else if (knights_.get(from)) {
@@ -78,7 +81,7 @@ Bitboard ChessBoard::generateMoves(Square from) const {
     } else if (bishops_.get(from)) {
         moves = generateBishopMoves(from, all_pieces_);
     } else if (rooks_.get(from)) {
-        moves =  generateRookMoves(from, all_pieces_);
+        moves = generateRookMoves(from, all_pieces_);
     } else if (queens_.get(from)) {
         moves = generateQueenMoves(from, all_pieces_);
     } else if (kings_.get(from)) {

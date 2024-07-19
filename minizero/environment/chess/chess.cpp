@@ -30,7 +30,6 @@ Player chessCharToPlayer(char c)
     }
 }
 
-
 void initialize()
 {
     // compute action string and id mapping
@@ -45,7 +44,8 @@ void initialize()
     }
 }
 
-ChessAction::ChessAction(int action_id, Player player) : BaseAction(action_id, player) {
+ChessAction::ChessAction(int action_id, Player player) : BaseAction(action_id, player)
+{
     assert(action_id >= 0 && action_id < static_cast<int>(kChessActionName.size()));
 
     std::string action_string = kChessActionName[action_id];
@@ -140,7 +140,7 @@ void generateActionString(int action_id)
 
     // action_string: "a1b1" or "g7h7q"
     action_string = kChessPositions[start_square] + kChessPositions[end_square];
-    if(promotion != '\0') {
+    if (promotion != '\0') {
         action_string += promotion;
     }
 
@@ -184,7 +184,7 @@ std::vector<ChessAction> ChessEnv::getLegalActions() const
     for (auto from : board_.ourPieces()) {
         Bitboard moves = board_.generateMoves(from);
 
-        for(auto to : moves) {
+        for (auto to : moves) {
             std::string action_string = kChessPositions[from.square_] + kChessPositions[to.square_];
             legal_actions.push_back(ChessAction({action_string}));
         }
@@ -225,8 +225,9 @@ std::string ChessEnv::toString() const
     return board_.toString();
 }
 
-std::string ChessEnv::DebugBitboardString(Bitboard bitboard) const {
-    return  board_.toString(bitboard);
+std::string ChessEnv::DebugBitboardString(Bitboard bitboard) const
+{
+    return board_.toString(bitboard);
 }
 
 std::vector<float> ChessEnv::getFeatures(utils::Rotation rotation) const
