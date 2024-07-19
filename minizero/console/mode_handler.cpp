@@ -164,17 +164,28 @@ void ModeHandler::runZeroTrainingName()
 
 void ModeHandler::runEnvTest()
 {
-    std::cout << "running environment test..." << std::endl;
     Environment env;
 
     env.reset();
-    while (!env.isTerminal()) {
+    std::cout << env.toString() << std::endl;
+
+    for (int i = 0; i < 10; i ++) {
         std::vector<Action> legal_actions = env.getLegalActions();
+
+        for(size_t i = 0; i < legal_actions.size(); i++) {
+            std::cout << legal_actions[i].toConsoleString() << " ";
+        }
+        std::cout << std::endl;
+
         int index = utils::Random::randInt() % legal_actions.size();
         env.act(legal_actions[index]);
-        break;
+        std::cout << env.toString() << std::endl;
     }
-    std::cout << env.toString() << std::endl;
+
+//    env.act({"e2e4"});
+//    env.act({"b1c3"});
+//    env.act({"c2c3"});
+//    std::cout << env.toString() << std::endl;
 
     EnvironmentLoader env_loader;
     env_loader.loadFromEnvironment(env);
