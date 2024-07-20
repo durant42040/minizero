@@ -51,6 +51,8 @@ std::string ChessBoard::toString(Bitboard bitboard) const
 
 bool ChessBoard::act(Square from, Square to)
 {
+    checkEnPassant(from, to);
+
     pawns_.update(from, to);
     knights_.update(from, to);
     bishops_.update(from, to);
@@ -66,15 +68,35 @@ bool ChessBoard::act(Square from, Square to)
     return true;
 }
 
+void ChessBoard::checkEnPassant(Square from, Square to)
+{
+    // check if en passant is played
+    if (pawns_.get(from) && en_passant_.get(to)) {
+        pawns_.clear(to.square_ - 8);
+        if (player_ == Player::kPlayer1) {
+            black_pieces_.clear(to.square_ - 8);
+            all_pieces_.clear(to.square_ - 8);
+        } else {
+            white_pieces_.clear(to.square_ + 8);
+            all_pieces_.clear(to.square_ + 8);
+        }
+    }
+    en_passant_.reset();
+    // check for double pawn moves
+    if (pawns_.get(from) && (abs(from.rank_ - to.rank_) == 2)) {
+        en_passant_.set((from.square_ + to.square_) / 2);
+    }
+}
+
 Bitboard ChessBoard::generateMoves(Square from) const
 {
     Bitboard moves(0);
 
     if (pawns_.get(from)) {
         if (player_ == Player::kPlayer1) {
-            moves = generateWhitePawnMoves(from, all_pieces_, black_pieces_);
+            moves = generateWhitePawnMoves(from, all_pieces_, black_pieces_ | en_passant_);
         } else if (player_ == Player::kPlayer2) {
-            moves = generateBlackPawnMoves(from, all_pieces_, white_pieces_);
+            moves = generateBlackPawnMoves(from, all_pieces_, white_pieces_ | en_passant_);
         }
     } else if (knights_.get(from)) {
         moves = generateKnightMoves(from);

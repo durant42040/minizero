@@ -57,13 +57,28 @@ public:
     // set the ith bit
     inline void set(Square i)
     {
-        bitboard_ |= (1ULL << i.square_);
+        set(i.square_);
+    }
+
+    inline void set(int i)
+    {
+        bitboard_ |= (1ULL << i);
+    }
+
+    inline void reset()
+    {
+        bitboard_ = 0;
     }
 
     // clear the ith bit
     inline void clear(Square i)
     {
-        bitboard_ &= ~(1ULL << i.square_);
+        clear(i.square_);
+    }
+
+    inline void clear(int i)
+    {
+        bitboard_ &= ~(1ULL << i);
     }
 
     // check if "from" bit is 1, if so, make move to "to" bit

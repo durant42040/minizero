@@ -269,24 +269,24 @@ const Bitboard kKnightAttacks[64] = {
     0x0010A00000000000ULL,
     0x0020400000000000ULL};
 
-Bitboard generateWhitePawnMoves(Square from, Bitboard all_pieces, Bitboard all_black_pieces)
+Bitboard generateWhitePawnMoves(Square from, Bitboard all_pieces, Bitboard capture_pieces)
 {
     Bitboard from_mask = Bitboard(1ULL << from.square_);
 
     Bitboard one_step_moves = (from_mask << 8) & ~all_pieces;
     Bitboard two_step_moves = ((one_step_moves & (0xFFULL << 16)) << 8) & ~all_pieces;
-    Bitboard capture_moves = kWhitePawnCaptures[from.square_] & all_black_pieces;
+    Bitboard capture_moves = kWhitePawnCaptures[from.square_] & capture_pieces;
 
     return (one_step_moves | two_step_moves | capture_moves);
 }
 
-Bitboard generateBlackPawnMoves(Square from, Bitboard all_pieces, Bitboard all_white_pieces)
+Bitboard generateBlackPawnMoves(Square from, Bitboard all_pieces, Bitboard capture_pieces)
 {
     Bitboard from_mask = Bitboard(1ULL << from.square_);
 
     Bitboard one_step_moves = (from_mask >> 8) & ~all_pieces;
     Bitboard two_step_moves = ((one_step_moves & (0xFFULL << 40)) >> 8) & ~all_pieces;
-    Bitboard capture_moves = kBlackPawnCaptures[from.square_] & all_white_pieces;
+    Bitboard capture_moves = kBlackPawnCaptures[from.square_] & capture_pieces;
 
     return (one_step_moves | two_step_moves | capture_moves);
 }

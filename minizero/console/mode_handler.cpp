@@ -167,25 +167,35 @@ void ModeHandler::runEnvTest()
     Environment env;
 
     env.reset();
-    std::cout << env.toString() << std::endl;
-
-    for (int i = 0; i < 10; i++) {
-        std::vector<Action> legal_actions = env.getLegalActions();
-
-        for (size_t i = 0; i < legal_actions.size(); i++) {
-            std::cout << legal_actions[i].toConsoleString() << " ";
-        }
-        std::cout << std::endl;
-
-        int index = utils::Random::randInt() % legal_actions.size();
-        env.act(legal_actions[index]);
-        std::cout << env.toString() << std::endl;
-    }
-
-    //    env.act({"e2e4"});
-    //    env.act({"b1c3"});
-    //    env.act({"c2c3"});
     //    std::cout << env.toString() << std::endl;
+
+    //    for (int i = 0; i < 10; i++) {
+    //        std::vector<Action> legal_actions = env.getLegalActions();
+    //
+    //        for (size_t i = 0; i < legal_actions.size(); i++) {
+    //            std::cout << legal_actions[i].toConsoleString() << " ";
+    //        }
+    //        std::cout << std::endl;
+    //
+    //        int index = utils::Random::randInt() % legal_actions.size();
+    //        env.act(legal_actions[index]);
+    //        std::cout << env.toString() << std::endl;
+    //    }
+
+    env.act({"e2e4"});
+    std::cout << env.toString() << std::endl;
+    env.act({"b8c6"});
+    std::cout << env.toString() << std::endl;
+    env.act({"e4e5"});
+    std::cout << env.toString() << std::endl;
+    env.act({"d7d5"});
+    std::cout << env.toString() << std::endl;
+    env.act({"g1f3"});
+    std::cout << env.toString() << std::endl;
+    env.act({"c6b8"});
+    for (auto i : env.getLegalActions()) {
+        std::cout << i.toConsoleString() << " ";
+    }
 
     EnvironmentLoader env_loader;
     env_loader.loadFromEnvironment(env);

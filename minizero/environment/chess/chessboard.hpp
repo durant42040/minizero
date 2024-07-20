@@ -15,6 +15,7 @@ public:
           all_pieces_(kStartPos),
           white_pieces_(kWhiteStartPos),
           black_pieces_(kBlackStartPos),
+          en_passant_(0),
           pawns_(kPawnStartPos),
           knights_(kKnightStartPos),
           bishops_(kBishopStartPos),
@@ -26,6 +27,7 @@ public:
 
     std::string toString(Bitboard bitboard = 0) const;
     bool act(Square from, Square to);
+    void checkEnPassant(Square from, Square to);
     Bitboard generateMoves(Square square) const;
     Bitboard ourPieces() const
     {
@@ -38,6 +40,8 @@ public:
 
     Bitboard white_pieces_;
     Bitboard black_pieces_;
+
+    Bitboard en_passant_;
 
     Bitboard pawns_;
     Bitboard knights_;

@@ -9,9 +9,9 @@ extern const Bitboard kBlackPawnCaptures[64];
 extern const Bitboard kKnightAttacks[64];
 extern const Bitboard kKingAttacks[64];
 
-Bitboard generateWhitePawnMoves(Square from, Bitboard allPieces, Bitboard allBlackPieces);
+Bitboard generateWhitePawnMoves(Square from, Bitboard all_pieces, Bitboard capture_pieces);
 
-Bitboard generateBlackPawnMoves(Square from, Bitboard allPieces, Bitboard allWhitePieces);
+Bitboard generateBlackPawnMoves(Square from, Bitboard all_pieces, Bitboard capture_pieces);
 
 Bitboard generateKnightMoves(Square from);
 
