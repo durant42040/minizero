@@ -81,6 +81,11 @@ public:
         bitboard_ &= ~(1ULL << i);
     }
 
+    inline bool empty() const
+    {
+        return bitboard_ == 0;
+    }
+
     // check if "from" bit is 1, if so, make move to "to" bit
     inline void update(Square from, Square to)
     {
@@ -89,6 +94,16 @@ public:
             clear(from);
             set(to);
         }
+    }
+
+    inline int getLSB() const
+    {
+        return __builtin_ctzll(bitboard_);
+    }
+
+    inline int count() const
+    {
+        return __builtin_popcountll(bitboard_);
     }
 
     friend Bitboard operator&(const Bitboard& lhs, const Bitboard& rhs)

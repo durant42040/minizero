@@ -8,10 +8,20 @@
 
 namespace minizero::env::chess {
 
+enum class GameState {
+    Playing,
+    WhiteWin,
+    BlackWin,
+    Draw,
+};
+
 class ChessBoard {
 public:
     ChessBoard()
-        : player_(Player::kPlayer1),
+        : game_state_(GameState::Playing),
+
+          player_(Player::kPlayer1),
+          fifty_move_rule_(0),
           all_pieces_(kStartPos),
           white_pieces_(kWhiteStartPos),
           black_pieces_(kBlackStartPos),
@@ -26,15 +36,37 @@ public:
     }
 
     std::string toString(Bitboard bitboard = 0) const;
-    bool act(Square from, Square to);
+    bool act(Square from, Square to, char promotion, bool update = true);
     void checkEnPassant(Square from, Square to);
+    bool isPlayerInCheck(Player player) const;
+    // generate pseudolegal moves
     Bitboard generateMoves(Square square) const;
-    Bitboard ourPieces() const
-    {
-        return player_ == Player::kPlayer1 ? white_pieces_ : black_pieces_;
-    }
+    // remove moves from generateMoves that would leave the king in check
+    Bitboard generateLegalMoves(Square square) const;
+    void updateGameState();
+    void updateDrawCondition(Square from, Square to);
 
+    inline Bitboard ourPieces(Player player) const
+    {
+        return player == Player::kPlayer1 ? white_pieces_ : black_pieces_;
+    }
+    inline Bitboard ourPieces() const
+    {
+        return ourPieces(player_);
+    }
+    inline Bitboard theirPieces(Player player) const
+    {
+        return player == Player::kPlayer1 ? black_pieces_ : white_pieces_;
+    }
+    inline Bitboard theirPieces() const
+    {
+        return theirPieces(player_);
+    }
+    bool hasMatingMaterial() const;
+
+    GameState game_state_;
     Player player_;
+    int fifty_move_rule_;
 
     Bitboard all_pieces_;
 

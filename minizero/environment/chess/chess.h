@@ -16,10 +16,14 @@ namespace minizero::env::chess {
 const std::string kChessName = "chess";
 const int kChessNumPlayer = 2;
 const int kChessBoardSize = 8;
-const int kMovePerSquare = 73;
+const int kMovePerSquare = 76;
 const int kChessPieces = 12;
+const int kChessActionSize = 1968;
 extern std::vector<std::string> kChessActionName;
 extern std::unordered_map<std::string, int> kChessActionMap;
+extern int kChessActionID[64][64];
+// [from][to][piece]
+extern int kPromotionActionID[64][64][4];
 
 const std::string kChessPositions[] = {
     "a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1",
@@ -36,7 +40,7 @@ void generateActionString(int action_id);
 
 class ChessAction : public BaseAction {
 public:
-    ChessAction() : BaseAction() {}
+    ChessAction() : BaseAction(), from_(), to_(), promotion_('\0') {}
     ChessAction(int action_id, Player player);
     explicit ChessAction(const std::vector<std::string>& action_string_args);
     inline Player nextPlayer() const override { return getNextPlayer(getPlayer(), kChessNumPlayer); }
@@ -44,6 +48,7 @@ public:
 
     Square from_;
     Square to_;
+    char promotion_;
 };
 
 class ChessEnv : public BaseBoardEnv<ChessAction> {
@@ -64,36 +69,32 @@ public:
     float getEvalScore(bool is_resign = false) const override;
     std::vector<float> getFeatures(utils::Rotation rotation = utils::Rotation::kRotationNone) const override;
     std::vector<float> getActionFeatures(const ChessAction& action, utils::Rotation rotation = utils::Rotation::kRotationNone) const override;
-    inline int getNumInputChannels() const override { return kChessPieces; }
+    inline int getNumInputChannels() const override { return 9; }
     inline int getNumActionFeatureChannels() const override { return 0; }
-    inline int getInputChannelHeight() const override { return kChessPieces; }
-    inline int getInputChannelWidth() const override { return getBoardSize() * getBoardSize(); }
-    inline int getHiddenChannelHeight() const override { return kChessPieces; }
-    inline int getHiddenChannelWidth() const override { return getBoardSize() * getBoardSize(); }
+    inline int getInputChannelHeight() const override { return kChessBoardSize; }
+    inline int getInputChannelWidth() const override { return kChessBoardSize; }
+    inline int getHiddenChannelHeight() const override { return kChessBoardSize; }
+    inline int getHiddenChannelWidth() const override { return kChessBoardSize; }
     inline int getPolicySize() const override { return getBoardSize() / 2 * 12; }
     std::string toString() const override;
     std::string DebugBitboardString(Bitboard bitboard) const;
     inline std::string name() const override { return kChessName + std::to_string(getBoardSize()) + "x" + std::to_string(getBoardSize()); }
     inline int getNumPlayer() const override { return kChessNumPlayer; }
 
-    inline int getRotatePosition(int position, utils::Rotation rotation) const override { return utils::getPositionByRotating(utils::Rotation::kRotationNone, position, getBoardSize()); };
-    inline int getRotateAction(int action_id, utils::Rotation rotation) const override { return getRotatePosition(action_id, utils::Rotation::kRotationNone); };
+    inline int getRotatePosition(int position, utils::Rotation rotation) const override { return position; };
+    inline int getRotateAction(int action_id, utils::Rotation rotation) const override { return action_id; };
 
     ChessBoard board_;
 };
 
 class ChessEnvLoader : public BaseBoardEnvLoader<ChessAction, ChessEnv> {
 public:
-    void loadFromEnvironment(const ChessEnv& env, const std::vector<std::vector<std::pair<std::string, std::string>>>& action_info_history = {}) override {}
-    inline int getSeed() const { return 0; }
-
-    std::vector<float> getFeatures(const int pos, utils::Rotation rotation = utils::Rotation::kRotationNone) const override;
     std::vector<float> getActionFeatures(const int pos, utils::Rotation rotation = utils::Rotation::kRotationNone) const override;
     inline std::vector<float> getValue(const int pos) const { return {getReturn()}; }
     inline std::string name() const override { return kChessName + std::to_string(getBoardSize()) + "x" + std::to_string(getBoardSize()); }
     inline int getPolicySize() const override { return getBoardSize() / 2 * 12; }
-    inline int getRotatePosition(int position, utils::Rotation rotation) const override { return utils::getPositionByRotating(utils::Rotation::kRotationNone, position, getBoardSize()); }
-    inline int getRotateAction(int action_id, utils::Rotation rotation) const override { return getRotatePosition(action_id, utils::Rotation::kRotationNone); }
+    inline int getRotatePosition(int position, utils::Rotation rotation) const override { return position; }
+    inline int getRotateAction(int action_id, utils::Rotation rotation) const override { return action_id; }
 };
 
 } // namespace minizero::env::chess

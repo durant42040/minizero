@@ -223,7 +223,12 @@ public:
         oss << "(;";
         for (const auto& t : tags_) { oss << t.first << "[" << escapeSGFString(t.second) << "]"; }
         for (const auto& p : action_pairs_) {
+#if CHESS
+            // White starts first in chess
+            oss << ";" << playerToChar(getNextPlayer(p.first.getPlayer(), 2)) << "[" << p.first.getActionID() << "]";
+#else
             oss << ";" << playerToChar(p.first.getPlayer()) << "[" << p.first.getActionID() << "]";
+#endif
             for (const auto& info : p.second) { oss << info.first << "[" << escapeSGFString(info.second) << "]"; }
         }
         oss << ")";
