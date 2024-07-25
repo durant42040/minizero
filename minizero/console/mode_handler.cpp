@@ -182,34 +182,34 @@ void ModeHandler::runEnvTest()
     //        std::cout << env.toString() << std::endl;
     //    }
 
-    env.act({"W", "g2g4"});
+    env.act({"W", "e2e4"});
+    std::cout << "to string" << std::endl;
     std::cout << env.toString() << std::endl;
-    env.act({"B", "g7g5"});
+    env.act({"B", "e7e5"});
     std::cout << env.toString() << std::endl;
-    env.act({"W", "f2f4"});
-    std::cout << env.toString() << std::endl;
-    env.act({"B", "g5f4"});
-    std::cout << env.toString() << std::endl;
-    env.act({"W", "g4g5"});
+    env.act({"W", "g1f3"});
     std::cout << env.toString() << std::endl;
     env.act({"B", "g8f6"});
     std::cout << env.toString() << std::endl;
-    env.act({"W", "g5g6"});
+    env.act({"W", "f1c4"});
     std::cout << env.toString() << std::endl;
-    env.act({"B", "f6g8"});
+    env.act({"B", "f8c5"});
     std::cout << env.toString() << std::endl;
-    env.act({"W", "g6g7"});
+    env.act({"W", "d2d4"});
     std::cout << env.toString() << std::endl;
-    env.act({"B", "g8f6"});
+    env.act({"B", "d7d5"});
+    std::cout << env.toString() << std::endl;
+    env.act({"W", "b1c3"});
+    std::cout << env.toString() << std::endl;
+    env.act({"B", "b8c6"});
+    std::cout << env.toString() << std::endl;
+    env.act({"W", "c1d2"});
+    std::cout << env.toString() << std::endl;
+    env.act({"B", "c8d7"});
+    std::cout << env.toString() << std::endl;
+    env.act({"W", "e1g1"});
     std::cout << env.toString() << std::endl;
 
-    env.act({"W", "g7f8b"});
-    std::cout << env.toString() << std::endl;
-
-    for (auto i : env.getLegalActions()) {
-        std::cout << i.toConsoleString() << " ";
-    }
-    std::cout << std::endl;
 
     EnvironmentLoader env_loader;
     env_loader.loadFromEnvironment(env);

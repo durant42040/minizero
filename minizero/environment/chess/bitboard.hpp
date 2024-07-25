@@ -89,6 +89,11 @@ public:
     // check if "from" bit is 1, if so, make move to "to" bit
     inline void update(Square from, Square to)
     {
+        update(from.square_, to.square_);
+    }
+
+    inline void update(int from, int to)
+    {
         clear(to);
         if (get(from)) {
             clear(from);

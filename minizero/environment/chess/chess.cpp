@@ -44,8 +44,6 @@ void initialize()
         ChessAction action({"W", kChessActionName[i]});
         assert(static_cast<int>(i) == action.getActionID());
     }
-
-    std::cout << kChessActionName.size() << " actions generated" << std::endl;
 }
 
 ChessAction::ChessAction(int action_id, Player player) : BaseAction(action_id, player)
@@ -216,7 +214,7 @@ std::vector<ChessAction> ChessEnv::getLegalActions() const
         Bitboard moves = board_.generateLegalMoves(from);
 
         for (auto to : moves) {
-            if (board_.pawns_.get(from) && ((from.rank_ == 6 && to.rank_ == 7) || (from.rank_ == 1 && to.rank_ == 0))) {
+            if (board_.pawns_.get(from) && ((to.rank_ == 7) || (to.rank_ == 0))) {
                 for (int i = 0; i < 4; i++) {
                     int promotion_action_id = kPromotionActionID[from.square_][to.square_][i];
                     legal_actions.push_back(ChessAction(promotion_action_id, board_.player_));

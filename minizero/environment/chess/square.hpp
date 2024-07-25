@@ -13,6 +13,11 @@ public:
         square_ = rank_ * 8 + file_;
     }
 
+    friend bool operator==(const Square& lhs, const int& rhs)
+    {
+        return lhs.square_ == rhs;
+    }
+
     int rank_;
     int file_;
     int square_;

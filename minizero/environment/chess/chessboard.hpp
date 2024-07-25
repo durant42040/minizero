@@ -8,6 +8,11 @@
 
 namespace minizero::env::chess {
 
+const uint64_t kWhiteKingsideSquares = 0x0000000000000070;
+const uint64_t kWhiteQueensideSquares = 0x000000000000001C;
+const uint64_t kBlackKingsideSquares = 0x7000000000000000;
+const uint64_t kBlackQueensideSquares = 0x1C00000000000000;
+
 enum class GameState {
     Playing,
     WhiteWin,
@@ -19,13 +24,13 @@ class ChessBoard {
 public:
     ChessBoard()
         : game_state_(GameState::Playing),
-
           player_(Player::kPlayer1),
           fifty_move_rule_(0),
+          castling_rights_(0b1111),
+          en_passant_(0),
           all_pieces_(kStartPos),
           white_pieces_(kWhiteStartPos),
           black_pieces_(kBlackStartPos),
-          en_passant_(0),
           pawns_(kPawnStartPos),
           knights_(kKnightStartPos),
           bishops_(kBishopStartPos),
@@ -38,6 +43,8 @@ public:
     std::string toString(Bitboard bitboard = 0) const;
     bool act(Square from, Square to, char promotion, bool update = true);
     void checkEnPassant(Square from, Square to);
+    void checkPromotion(char promotion, Square from);
+    bool hasMatingMaterial() const;
     bool isPlayerInCheck(Player player) const;
     // generate pseudolegal moves
     Bitboard generateMoves(Square square) const;
@@ -45,7 +52,7 @@ public:
     Bitboard generateLegalMoves(Square square) const;
     void updateGameState();
     void updateDrawCondition(Square from, Square to);
-
+    void Castling(Square from, Square to);
     inline Bitboard ourPieces(Player player) const
     {
         return player == Player::kPlayer1 ? white_pieces_ : black_pieces_;
@@ -62,18 +69,17 @@ public:
     {
         return theirPieces(player_);
     }
-    bool hasMatingMaterial() const;
 
     GameState game_state_;
     Player player_;
-    int fifty_move_rule_;
+    uint8_t fifty_move_rule_;
+    uint8_t castling_rights_;
+    Bitboard en_passant_;
 
     Bitboard all_pieces_;
 
     Bitboard white_pieces_;
     Bitboard black_pieces_;
-
-    Bitboard en_passant_;
 
     Bitboard pawns_;
     Bitboard knights_;

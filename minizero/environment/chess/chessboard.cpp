@@ -48,6 +48,20 @@ std::string ChessBoard::toString(Bitboard bitboard) const
 
     result = result + "Player: " + (player_ == Player::kPlayer1 ? "White" : "Black") + "\n";
     result = result + "In Check: " + (isPlayerInCheck(player_) ? "Yes" : "No") + "\n";
+    // get castling rights
+    result = result + "Castling rights: ";
+    if (castling_rights_ & 1) {
+        result += "K";
+    }
+    if (castling_rights_ & 2) {
+        result += "Q";
+    }
+    if (castling_rights_ & 4) {
+        result += "k";
+    }
+    if (castling_rights_ & 8) {
+        result += "q";
+    }
 
     return result;
 }
@@ -56,16 +70,8 @@ bool ChessBoard::act(Square from, Square to, char promotion, bool update)
 {
     updateDrawCondition(from, to);
     checkEnPassant(from, to);
-    if (promotion) {
-        switch (promotion) {
-            case 'q': queens_.set(from); break;
-            case 'r': rooks_.set(from); break;
-            case 'b': bishops_.set(from); break;
-            case 'n': knights_.set(from); break;
-            default: std::cerr << "invalid promotion piece" << std::endl; return false;
-        }
-        pawns_.clear(from);
-    }
+    checkPromotion(promotion, from);
+    Castling(from, to);
     pawns_.update(from, to);
     knights_.update(from, to);
     bishops_.update(from, to);
@@ -89,11 +95,13 @@ void ChessBoard::checkEnPassant(Square from, Square to)
 {
     // check if en passant is played
     if (pawns_.get(from) && en_passant_.get(to)) {
-        pawns_.clear(to.square_ - 8);
-        if (player_ == Player::kPlayer1) {
+        // clear captured pawn
+        if (white_pieces_.get(from)) {
+            pawns_.clear(to.square_ - 8);
             black_pieces_.clear(to.square_ - 8);
             all_pieces_.clear(to.square_ - 8);
-        } else {
+        } else if (black_pieces_.get(from)) {
+            pawns_.clear(to.square_ + 8);
             white_pieces_.clear(to.square_ + 8);
             all_pieces_.clear(to.square_ + 8);
         }
@@ -102,6 +110,20 @@ void ChessBoard::checkEnPassant(Square from, Square to)
     // check for double pawn moves
     if (pawns_.get(from) && (abs(from.rank_ - to.rank_) == 2)) {
         en_passant_.set((from.square_ + to.square_) / 2);
+    }
+}
+
+void ChessBoard::checkPromotion(char promotion, Square from)
+{
+    if (promotion) {
+        switch (promotion) {
+            case 'q': queens_.set(from); break;
+            case 'r': rooks_.set(from); break;
+            case 'b': bishops_.set(from); break;
+            case 'n': knights_.set(from); break;
+            default: std::cerr << "invalid promotion piece" << std::endl;
+        }
+        pawns_.clear(from);
     }
 }
 
@@ -126,7 +148,6 @@ Bitboard ChessBoard::generateMoves(Square from) const
         moves = generateQueenMoves(from, all_pieces_);
     } else if (kings_.get(from)) {
         moves = generateKingMoves(from);
-        // TODO: Castling
     } else {
         moves = Bitboard(0);
     }
@@ -140,6 +161,54 @@ Bitboard ChessBoard::generateMoves(Square from) const
 Bitboard ChessBoard::generateLegalMoves(Square from) const
 {
     Bitboard moves = generateMoves(from);
+    // add castling moves
+    if (kings_.get(from)) {
+        if (from == 4) {
+            Bitboard all_black_moves = Bitboard(0);
+            for (auto from : black_pieces_) {
+                all_black_moves |= generateMoves(from);
+            }
+
+            // can castle if no squares occupied or attacked between king and rook, and castling rights are set
+            bool can_white_castle_kingside =
+                (all_black_moves & kWhiteKingsideSquares).empty() &&
+                (all_pieces_ & (kWhiteKingsideSquares & ~kings_)).empty() &&
+                (castling_rights_ & 1);
+            bool can_white_castle_queenside =
+                (all_black_moves & kWhiteQueensideSquares).empty() &&
+                (all_pieces_ & (kWhiteQueensideSquares & ~kings_)).empty() &&
+                (castling_rights_ & 2);
+
+            if (can_white_castle_kingside) {
+                moves.set(6);
+            }
+            if (can_white_castle_queenside) {
+                moves.set(2);
+            }
+        } else if (from == 60) {
+            Bitboard all_white_moves = Bitboard(0);
+            for (auto from : white_pieces_) {
+                all_white_moves |= generateMoves(from);
+            }
+
+            // can castle if no squares occupied or attacked between king and rook, and castling rights are set
+            bool can_black_castle_kingside =
+                (all_white_moves & kBlackKingsideSquares).empty() &&
+                (all_pieces_ & (kBlackKingsideSquares & ~kings_)).empty() &&
+                (castling_rights_ & 4);
+            bool can_black_castle_queenside =
+                (all_white_moves & kBlackQueensideSquares).empty() &&
+                (all_pieces_ & (kBlackQueensideSquares & ~kings_)).empty() &&
+                (castling_rights_ & 8);
+
+            if (can_black_castle_kingside) {
+                moves.set(62);
+            }
+            if (can_black_castle_queenside) {
+                moves.set(58);
+            }
+        }
+    }
     // remove moves that would put our king in check
     // e.g. pins, illegal king moves
     for (auto to : moves) {
@@ -221,6 +290,49 @@ void ChessBoard::updateDrawCondition(Square from, Square to)
     // reset if pawn is moved or piece is captured
     if (pawns_.get(from) || all_pieces_.get(to)) {
         fifty_move_rule_ = 0;
+    }
+}
+
+void ChessBoard::Castling(Square from, Square to)
+{
+    // remove castling rights if king or rook is moved
+    if (from == 0) {
+        castling_rights_ &= ~2;
+    } else if (from == 7) {
+        castling_rights_ &= ~1;
+    } else if (from == 4) {
+        castling_rights_ &= ~3;
+    } else if (from == 56) {
+        castling_rights_ &= ~8;
+    } else if (from == 60) {
+        castling_rights_ &= ~12;
+    } else if (from == 63) {
+        castling_rights_ &= ~4;
+    }
+
+    // move rook if castling
+    if (kings_.get(from) && abs(from.file_ - to.file_) == 2) {
+        if (from == 4) {
+            if (to == 2) {
+                rooks_.update(0, 3);
+                white_pieces_.update(0, 3);
+                all_pieces_.update(0, 3);
+            } else if (to == 6) {
+                rooks_.update(7, 5);
+                white_pieces_.update(7, 5);
+                all_pieces_.update(7, 5);
+            }
+        } else if (from == 60) {
+            if (to == 58) {
+                rooks_.update(56, 59);
+                black_pieces_.update(56, 59);
+                all_pieces_.update(56, 59);
+            } else if (to == 62) {
+                rooks_.update(63, 61);
+                black_pieces_.update(63, 61);
+                all_pieces_.update(63, 61);
+            }
+        }
     }
 }
 
