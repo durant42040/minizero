@@ -7,6 +7,8 @@
 #include "ostream_redirector.h"
 #include "random.h"
 #include "zero_server.h"
+#include <cstdlib>
+#include <ctime>
 #include <string>
 #include <vector>
 
@@ -165,51 +167,56 @@ void ModeHandler::runZeroTrainingName()
 void ModeHandler::runEnvTest()
 {
     Environment env;
-
     env.reset();
-    //    std::cout << env.toString() << std::endl;
-
-    //    for (int i = 0; i < 10; i++) {
-    //        std::vector<Action> legal_actions = env.getLegalActions();
+    std::cout << env.toString() << std::endl;
     //
-    //        for (size_t i = 0; i < legal_actions.size(); i++) {
-    //            std::cout << legal_actions[i].toConsoleString() << " ";
-    //        }
-    //        std::cout << std::endl;
-    //
-    //        int index = utils::Random::randInt() % legal_actions.size();
-    //        env.act(legal_actions[index]);
-    //        std::cout << env.toString() << std::endl;
+    //    std::vector<Action> legal_actions = env.getLegalActions();
+    //    std::cout << "Legal actions: " << legal_actions.size() << std::endl;
+    //    for (size_t i = 0; i < legal_actions.size(); i++) {
+    //        std::cout << legal_actions[i].toConsoleString() << " ";
     //    }
+    //    std::cout << std::endl;
 
-    env.act({"W", "e2e4"});
-    std::cout << "to string" << std::endl;
-    std::cout << env.toString() << std::endl;
-    env.act({"B", "e7e5"});
-    std::cout << env.toString() << std::endl;
-    env.act({"W", "g1f3"});
-    std::cout << env.toString() << std::endl;
-    env.act({"B", "g8f6"});
-    std::cout << env.toString() << std::endl;
-    env.act({"W", "f1c4"});
-    std::cout << env.toString() << std::endl;
-    env.act({"B", "f8c5"});
-    std::cout << env.toString() << std::endl;
-    env.act({"W", "d2d4"});
-    std::cout << env.toString() << std::endl;
-    env.act({"B", "d7d5"});
-    std::cout << env.toString() << std::endl;
-    env.act({"W", "b1c3"});
-    std::cout << env.toString() << std::endl;
-    env.act({"B", "b8c6"});
-    std::cout << env.toString() << std::endl;
-    env.act({"W", "c1d2"});
-    std::cout << env.toString() << std::endl;
-    env.act({"B", "c8d7"});
-    std::cout << env.toString() << std::endl;
-    env.act({"W", "e1g1"});
-    std::cout << env.toString() << std::endl;
+    std::srand(std::time(0));
+    while (!env.isTerminal()) {
+        std::vector<Action> legal_actions = env.getLegalActions();
 
+        for (size_t i = 0; i < legal_actions.size(); i++) {
+            std::cout << legal_actions[i].toConsoleString() << " ";
+        }
+        std::cout << std::endl;
+
+        int index = std::rand() % legal_actions.size();
+        env.act(legal_actions[index]);
+        std::cout << env.toString() << std::endl;
+    }
+
+    //    env.act({"W", "e2e4"});
+    //    std::cout << env.toString() << std::endl;
+    //    env.act({"B", "e7e5"});
+    //    std::cout << env.toString() << std::endl;
+    //    env.act({"W", "g1f3"});
+    //    std::cout << env.toString() << std::endl;
+    //    env.act({"B", "g8f6"});
+    //    std::cout << env.toString() << std::endl;
+    //    env.act({"W", "f1c4"});
+    //    std::cout << env.toString() << std::endl;
+    //    env.act({"B", "f8c5"});
+    //    std::cout << env.toString() << std::endl;
+    //    env.act({"W", "d2d4"});
+    //    std::cout << env.toString() << std::endl;
+    //    env.act({"B", "d7d5"});
+    //    std::cout << env.toString() << std::endl;
+    //    env.act({"W", "b1c3"});
+    //    std::cout << env.toString() << std::endl;
+    //    env.act({"B", "b8c6"});
+    //    std::cout << env.toString() << std::endl;
+    //    env.act({"W", "c1d2"});
+    //    std::cout << env.toString() << std::endl;
+    //    env.act({"B", "c8d7"});
+    //    std::cout << env.toString() << std::endl;
+    //    env.act({"W", "e1g1"});
+    //    std::cout << env.toString() << std::endl;
 
     EnvironmentLoader env_loader;
     env_loader.loadFromEnvironment(env);

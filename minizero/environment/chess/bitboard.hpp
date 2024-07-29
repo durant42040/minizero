@@ -8,18 +8,6 @@
 
 namespace minizero::env::chess {
 
-constexpr uint64_t kPawnStartPos = 0xFF00 | (0xFFULL << 48);
-constexpr uint64_t kRookStartPos = 0x81 | (0x81ULL << 56);
-constexpr uint64_t kKnightStartPos = 0x42 | (0x42ULL << 56);
-constexpr uint64_t kBishopStartPos = 0x24 | (0x24ULL << 56);
-constexpr uint64_t kKingStartPos = 0x10 | (0x10ULL << 56);
-constexpr uint64_t kQueenStartPos = 0x08 | (0x08ULL << 56);
-
-constexpr uint64_t kWhiteStartPos = 0xFFFF;
-constexpr uint64_t kBlackStartPos = 0xFFFFULL << 48;
-
-constexpr uint64_t kStartPos = kWhiteStartPos | kBlackStartPos;
-
 template <typename T>
 class BitIterator {
 public:
@@ -41,6 +29,7 @@ private:
 
 class Bitboard {
 public:
+    Bitboard() : bitboard_(0) {}
     Bitboard(uint64_t board) : bitboard_(board) {}
 
     // check if the ith bit is set

@@ -1,5 +1,6 @@
 #include "chessboard.hpp"
 #include "bitboard.hpp"
+#include "color_message.h"
 #include "move_generator.hpp"
 
 #include <algorithm>
@@ -7,9 +8,11 @@
 
 namespace minizero::env::chess {
 
-std::string ChessBoard::toString(Bitboard bitboard) const
+using namespace minizero::utils;
+
+std::string ChessBoard::toString(Square prev_move_from, Square prev_move_to) const
 {
-    std::string board; // Initialize an empty board with dots
+    std::string board;
 
     for (int i = 0; i < 64; i++) {
         if (pawns_.get(i)) {
@@ -31,9 +34,6 @@ std::string ChessBoard::toString(Bitboard bitboard) const
             // convert last char to uppercase
             board.back() -= 32;
         }
-        if (bitboard.get(i)) {
-            board.back() = 'X';
-        }
         if (i % 8 == 7) {
             board += '\n';
         } else {
@@ -41,29 +41,35 @@ std::string ChessBoard::toString(Bitboard bitboard) const
         }
     }
 
-    std::string result;
+    std::ostringstream result;
     for (int i = 7; i >= 0; i--) {
-        result += board.substr(16 * i, 16);
+        for (int j = 0; j < 16; j++) {
+            if ((prev_move_from == i * 8 + j / 2 || prev_move_to == i * 8 + j / 2) && (board[i * 16 + j] != ' ')) {
+                result << getColorText(std::string() + board[i * 16 + j], TextType::kBold, TextColor::kRed, TextColor::kSize);
+            } else {
+                result << board[i * 16 + j];
+            }
+        }
     }
 
-    result = result + "Player: " + (player_ == Player::kPlayer1 ? "White" : "Black") + "\n";
-    result = result + "In Check: " + (isPlayerInCheck(player_) ? "Yes" : "No") + "\n";
+    result << "Player: " << (player_ == Player::kPlayer1 ? "White" : "Black") << "\n";
+    result << "In Check: " << (isPlayerInCheck(player_) ? "Yes" : "No") << "\n";
     // get castling rights
-    result = result + "Castling rights: ";
+    result << "Castling rights: ";
     if (castling_rights_ & 1) {
-        result += "K";
+        result << "K";
     }
     if (castling_rights_ & 2) {
-        result += "Q";
+        result << "Q";
     }
     if (castling_rights_ & 4) {
-        result += "k";
+        result << "k";
     }
     if (castling_rights_ & 8) {
-        result += "q";
+        result << "q";
     }
 
-    return result;
+    return result.str();
 }
 
 bool ChessBoard::act(Square from, Square to, char promotion, bool update)
@@ -167,6 +173,10 @@ Bitboard ChessBoard::generateLegalMoves(Square from) const
             Bitboard all_black_moves = Bitboard(0);
             for (auto from : black_pieces_) {
                 all_black_moves |= generateMoves(from);
+                if (pawns_.get(from)) {
+                    all_black_moves.set(from.square_ + 7);
+                    all_black_moves.set(from.square_ + 9);
+                }
             }
 
             // can castle if no squares occupied or attacked between king and rook, and castling rights are set
@@ -189,6 +199,10 @@ Bitboard ChessBoard::generateLegalMoves(Square from) const
             Bitboard all_white_moves = Bitboard(0);
             for (auto from : white_pieces_) {
                 all_white_moves |= generateMoves(from);
+                if (pawns_.get(from)) {
+                    all_white_moves.set(from.square_ + 7);
+                    all_white_moves.set(from.square_ + 9);
+                }
             }
 
             // can castle if no squares occupied or attacked between king and rook, and castling rights are set
@@ -196,6 +210,7 @@ Bitboard ChessBoard::generateLegalMoves(Square from) const
                 (all_white_moves & kBlackKingsideSquares).empty() &&
                 (all_pieces_ & (kBlackKingsideSquares & ~kings_)).empty() &&
                 (castling_rights_ & 4);
+
             bool can_black_castle_queenside =
                 (all_white_moves & kBlackQueensideSquares).empty() &&
                 (all_pieces_ & (kBlackQueensideSquares & ~kings_)).empty() &&
@@ -245,6 +260,7 @@ void ChessBoard::updateGameState()
     if (all_moves.empty()) {
         if (isPlayerInCheck(player_)) {
             // Checkmate
+            std::cout << "Checkmate" << std::endl;
             if (player_ == Player::kPlayer1) {
                 game_state_ = GameState::BlackWin;
             } else if (player_ == Player::kPlayer2) {
@@ -252,18 +268,20 @@ void ChessBoard::updateGameState()
             }
         } else {
             // Stalemate
+            std::cout << "Stalemate" << std::endl;
             game_state_ = GameState::Draw;
         }
     }
     // Insufficient material
     if (!hasMatingMaterial()) {
+        std::cout << "Insufficient material" << std::endl;
         game_state_ = GameState::Draw;
     }
     // 50-move rule
     if (fifty_move_rule_ == 50) {
+        std::cout << "50-move rule" << std::endl;
         game_state_ = GameState::Draw;
     }
-    // TODO: threefold-repetition
 }
 
 bool ChessBoard::hasMatingMaterial() const
@@ -296,17 +314,17 @@ void ChessBoard::updateDrawCondition(Square from, Square to)
 void ChessBoard::Castling(Square from, Square to)
 {
     // remove castling rights if king or rook is moved
-    if (from == 0) {
+    if (from == 0 || to == 0) {
         castling_rights_ &= ~2;
-    } else if (from == 7) {
+    } else if (from == 7 || to == 7) {
         castling_rights_ &= ~1;
-    } else if (from == 4) {
+    } else if (from == 4 || to == 4) {
         castling_rights_ &= ~3;
-    } else if (from == 56) {
+    } else if (from == 56 || to == 56) {
         castling_rights_ &= ~8;
-    } else if (from == 60) {
+    } else if (from == 60 || to == 60) {
         castling_rights_ &= ~12;
-    } else if (from == 63) {
+    } else if (from == 63 || to == 63) {
         castling_rights_ &= ~4;
     }
 
@@ -334,6 +352,80 @@ void ChessBoard::Castling(Square from, Square to)
             }
         }
     }
+}
+
+void ChessBoard::setFen(std::string fen)
+{
+    std::string board;
+    std::istringstream fen_str(fen);
+    fen_str >> board;
+
+    int rank = 7;
+    int file = 0;
+    for (char c : board) {
+        int i = rank * 8 + file;
+        if (c == '/') {
+            rank--;
+            file = 0;
+            continue;
+        }
+        if (std::isdigit(c)) {
+            file += c - '0';
+            continue;
+        }
+        if (std::isupper(c)) {
+            white_pieces_.set(i);
+        } else {
+            black_pieces_.set(i);
+        }
+        all_pieces_.set(i);
+        if (c == 'k' || c == 'K') {
+            kings_.set(i);
+        } else if (c == 'q' || c == 'Q') {
+            queens_.set(i);
+        } else if (c == 'r' || c == 'R') {
+            rooks_.set(i);
+        } else if (c == 'b' || c == 'B') {
+            bishops_.set(i);
+        } else if (c == 'n' || c == 'N') {
+            knights_.set(i);
+        } else if (c == 'p' || c == 'P') {
+            pawns_.set(i);
+        }
+        file++;
+    }
+
+    // set player
+    std::string player_string = "w";
+    if (!fen_str.eof()) fen_str >> player_string;
+    player_ = player_string == "w" ? Player::kPlayer1 : Player::kPlayer2;
+
+    // set castling rights
+    std::string castling_rights_string = "-";
+    if (!fen_str.eof()) fen_str >> castling_rights_string;
+    for (char c : castling_rights_string) {
+        if (c == 'K') {
+            castling_rights_ |= 1;
+        } else if (c == 'Q') {
+            castling_rights_ |= 2;
+        } else if (c == 'k') {
+            castling_rights_ |= 4;
+        } else if (c == 'q') {
+            castling_rights_ |= 8;
+        }
+    }
+
+    // set en passant square
+    std::string en_passant_string = "-";
+    if (!fen_str.eof()) fen_str >> en_passant_string;
+    if (en_passant_string != "-") {
+        en_passant_.set(Square(en_passant_string));
+    }
+
+    // set halfmove clock
+    std::string halfmove_string = "0";
+    if (!fen_str.eof()) fen_str >> halfmove_string;
+    fifty_move_rule_ = std::stoi(halfmove_string);
 }
 
 } // namespace minizero::env::chess

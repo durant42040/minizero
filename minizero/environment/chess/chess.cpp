@@ -276,12 +276,11 @@ float ChessEnv::getEvalScore(bool is_resign) const
 
 std::string ChessEnv::toString() const
 {
-    return board_.toString();
-}
-
-std::string ChessEnv::DebugBitboardString(Bitboard bitboard) const
-{
-    return board_.toString(bitboard);
+    if (actions_.empty()) {
+        return board_.toString(Square(-1), Square(-1));
+    } else {
+        return board_.toString(actions_.back().from_, actions_.back().to_);
+    }
 }
 
 std::vector<float> ChessEnv::getFeatures(utils::Rotation rotation) const
@@ -310,6 +309,15 @@ std::vector<float> ChessEnv::getFeatures(utils::Rotation rotation) const
     }
     for (int i = 0; i < 64; i++) {
         features.push_back(board_.black_pieces_.get(i));
+    }
+    for (int i = 0; i < 64; i++) {
+        features.push_back(board_.en_passant_.get(i));
+    }
+    for (int i = 0; i < 64; i++) {
+        features.push_back(board_.castling_rights_);
+    }
+    for (int i = 0; i < 64; i++) {
+        features.push_back(board_.fifty_move_rule_);
     }
     for (int i = 0; i < 64; i++) {
         features.push_back(board_.player_ == Player::kPlayer1 ? 1.0f : 0.0f);

@@ -48,7 +48,7 @@ public:
 
     Square from_;
     Square to_;
-    char promotion_;
+    char promotion_ = '\0';
 };
 
 class ChessEnv : public BaseBoardEnv<ChessAction> {
@@ -77,7 +77,6 @@ public:
     inline int getHiddenChannelWidth() const override { return kChessBoardSize; }
     inline int getPolicySize() const override { return getBoardSize() / 2 * 12; }
     std::string toString() const override;
-    std::string DebugBitboardString(Bitboard bitboard) const;
     inline std::string name() const override { return kChessName + std::to_string(getBoardSize()) + "x" + std::to_string(getBoardSize()); }
     inline int getNumPlayer() const override { return kChessNumPlayer; }
 
