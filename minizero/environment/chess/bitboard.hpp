@@ -95,6 +95,13 @@ public:
         return __builtin_ctzll(bitboard_);
     }
 
+    inline int popLSB()
+    {
+        int lsb = getLSB();
+        clear(lsb);
+        return lsb;
+    }
+
     inline int count() const
     {
         return __builtin_popcountll(bitboard_);

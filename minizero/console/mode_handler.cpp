@@ -166,57 +166,27 @@ void ModeHandler::runZeroTrainingName()
 
 void ModeHandler::runEnvTest()
 {
-    Environment env;
-    env.reset();
+    Environment env("r3r1k1/pp3pbp/1qp1b1p1/2B5/2BP4/Q1n2N2/P4PPP/3R1K1R w - - 4 18");
     std::cout << env.toString() << std::endl;
-    //
-    //    std::vector<Action> legal_actions = env.getLegalActions();
-    //    std::cout << "Legal actions: " << legal_actions.size() << std::endl;
-    //    for (size_t i = 0; i < legal_actions.size(); i++) {
-    //        std::cout << legal_actions[i].toConsoleString() << " ";
-    //    }
-    //    std::cout << std::endl;
 
-    std::srand(std::time(0));
-    while (!env.isTerminal()) {
-        std::vector<Action> legal_actions = env.getLegalActions();
-
-        for (size_t i = 0; i < legal_actions.size(); i++) {
-            std::cout << legal_actions[i].toConsoleString() << " ";
-        }
-        std::cout << std::endl;
-
-        int index = std::rand() % legal_actions.size();
-        env.act(legal_actions[index]);
-        std::cout << env.toString() << std::endl;
+    std::cout << env.getLegalActions().size() << std::endl;
+    for (size_t i = 0; i < env.getLegalActions().size(); i++) {
+        std::cout << env.getLegalActions()[i].toConsoleString() << " ";
     }
 
-    //    env.act({"W", "e2e4"});
-    //    std::cout << env.toString() << std::endl;
-    //    env.act({"B", "e7e5"});
-    //    std::cout << env.toString() << std::endl;
-    //    env.act({"W", "g1f3"});
-    //    std::cout << env.toString() << std::endl;
-    //    env.act({"B", "g8f6"});
-    //    std::cout << env.toString() << std::endl;
-    //    env.act({"W", "f1c4"});
-    //    std::cout << env.toString() << std::endl;
-    //    env.act({"B", "f8c5"});
-    //    std::cout << env.toString() << std::endl;
-    //    env.act({"W", "d2d4"});
-    //    std::cout << env.toString() << std::endl;
-    //    env.act({"B", "d7d5"});
-    //    std::cout << env.toString() << std::endl;
-    //    env.act({"W", "b1c3"});
-    //    std::cout << env.toString() << std::endl;
-    //    env.act({"B", "b8c6"});
-    //    std::cout << env.toString() << std::endl;
-    //    env.act({"W", "c1d2"});
-    //    std::cout << env.toString() << std::endl;
-    //    env.act({"B", "c8d7"});
-    //    std::cout << env.toString() << std::endl;
-    //    env.act({"W", "e1g1"});
-    //    std::cout << env.toString() << std::endl;
+    //    std::srand(std::time(0));
+    //    while (!env.isTerminal()) {
+    //        std::vector<Action> legal_actions = env.getLegalActions();
+    //
+    //        for (size_t i = 0; i < legal_actions.size(); i++) {
+    //            std::cout << legal_actions[i].toConsoleString() << " ";
+    //        }
+    //        std::cout << std::endl;
+    //
+    //        int index = std::rand() % legal_actions.size();
+    //        env.act(legal_actions[index]);
+    //        std::cout << env.toString() << std::endl;
+    //    }
 
     EnvironmentLoader env_loader;
     env_loader.loadFromEnvironment(env);

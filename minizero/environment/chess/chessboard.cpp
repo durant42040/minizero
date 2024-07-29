@@ -77,7 +77,7 @@ bool ChessBoard::act(Square from, Square to, char promotion, bool update)
     updateDrawCondition(from, to);
     checkEnPassant(from, to);
     checkPromotion(promotion, from);
-    Castling(from, to);
+    castling(from, to);
     pawns_.update(from, to);
     knights_.update(from, to);
     bishops_.update(from, to);
@@ -311,7 +311,7 @@ void ChessBoard::updateDrawCondition(Square from, Square to)
     }
 }
 
-void ChessBoard::Castling(Square from, Square to)
+void ChessBoard::castling(Square from, Square to)
 {
     // remove castling rights if king or rook is moved
     if (from == 0 || to == 0) {

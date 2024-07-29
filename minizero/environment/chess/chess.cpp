@@ -186,6 +186,11 @@ void ChessEnv::reset()
     turn_ = Player::kPlayer1;
 }
 
+void ChessEnv::setFen(const std::string& fen)
+{
+    board_ = ChessBoard(fen);
+}
+
 bool ChessEnv::act(const ChessAction& action)
 {
     if (isLegalAction(action)) {

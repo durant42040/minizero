@@ -56,9 +56,20 @@ public:
     ChessEnv() : BaseBoardEnv<ChessAction>(kChessBoardSize)
     {
         reset();
+        initBishopMoves();
+        initRookMoves();
+    }
+
+    ChessEnv(std::string fen) : BaseBoardEnv<ChessAction>(kChessBoardSize)
+    {
+        reset();
+        setFen(fen);
+        initBishopMoves();
+        initRookMoves();
     }
 
     void reset() override;
+    void setFen(const std::string& fen);
     bool act(const ChessAction& action) override;
     bool act(const std::vector<std::string>& action_string_args) override;
     std::vector<ChessAction> getLegalActions() const override;

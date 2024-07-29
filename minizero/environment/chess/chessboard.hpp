@@ -2,6 +2,7 @@
 
 #include "base_env.h"
 #include "bitboard.hpp"
+#include "move_generator.hpp"
 #include <iostream>
 #include <string>
 #include <vector>
@@ -45,7 +46,7 @@ public:
     Bitboard generateLegalMoves(Square square) const;
     void updateGameState();
     void updateDrawCondition(Square from, Square to);
-    void Castling(Square from, Square to);
+    void castling(Square from, Square to);
     void setFen(std::string fen);
     inline Bitboard ourPieces(Player player) const
     {
