@@ -2,6 +2,7 @@
 #include "bitboard.hpp"
 #include "color_message.h"
 #include "move_generator.hpp"
+#include "random.h"
 
 #include <algorithm>
 #include <string>
@@ -9,6 +10,29 @@
 namespace minizero::env::chess {
 
 using namespace minizero::utils;
+
+uint64_t PieceKeys[2][6][64] = {0};
+uint64_t CastleKeys[4] = {0};
+uint64_t EnPassantKeys[8]= {0};
+uint64_t whiteToMoveKey = 0;
+
+void initKeys()
+{
+    for (int i = 0; i < 8; i++) {
+        EnPassantKeys[i] = utils::Random::randInt64();
+    }
+    for (int i = 0; i < 4; i++) {
+        CastleKeys[i] = utils::Random::randInt64();
+    }
+    for (int i = 0; i < 2; i++) {
+        for (int j = 0; j < 6; j++) {
+            for (int k = 0; k < 64; k++) {
+                PieceKeys[i][j][k] = utils::Random::randInt64();
+            }
+        }
+    }
+    whiteToMoveKey = utils::Random::randInt64();
+}
 
 std::string ChessBoard::toString(Square prev_move_from, Square prev_move_to) const
 {
@@ -88,6 +112,7 @@ bool ChessBoard::act(Square from, Square to, char promotion, bool update)
     black_pieces_.update(from, to);
     all_pieces_.update(from, to);
 
+    position_history_.push_back(generateHash());
     player_ = getNextPlayer(player_, 2);
 
     if (update) {
@@ -282,6 +307,17 @@ void ChessBoard::updateGameState()
         std::cout << "50-move rule" << std::endl;
         game_state_ = GameState::Draw;
     }
+    // check for three-fold repetition
+    int repetitions = 0;
+    for (int i = position_history_.size() - 3; i >= 0; i -= 2) {
+        if (position_history_[i] == position_history_.back()) {
+            repetitions++;
+        }
+    }
+    if (repetitions >= 2) {
+        std::cout << "Three-fold repetition" << std::endl;
+        game_state_ = GameState::Draw;
+    }
 }
 
 bool ChessBoard::hasMatingMaterial() const
@@ -426,6 +462,61 @@ void ChessBoard::setFen(std::string fen)
     std::string halfmove_string = "0";
     if (!fen_str.eof()) fen_str >> halfmove_string;
     fifty_move_rule_ = std::stoi(halfmove_string);
+}
+
+uint64_t ChessBoard::generateHash() const {
+    uint64_t hash = 0;
+    for(auto i : white_pieces_) {
+        if (pawns_.get(i)) {
+            hash ^= PieceKeys[0][0][i.square_];
+        } else if (knights_.get(i)) {
+            hash ^= PieceKeys[0][1][i.square_];
+        } else if (bishops_.get(i)) {
+            hash ^= PieceKeys[0][2][i.square_];
+        } else if (rooks_.get(i)) {
+            hash ^= PieceKeys[0][3][i.square_];
+        } else if (queens_.get(i)) {
+            hash ^= PieceKeys[0][4][i.square_];
+        } else if (kings_.get(i)) {
+            hash ^= PieceKeys[0][5][i.square_];
+        }
+    }
+    for(auto i : black_pieces_) {
+        if (pawns_.get(i)) {
+            hash ^= PieceKeys[1][0][i.square_];
+        } else if (knights_.get(i)) {
+            hash ^= PieceKeys[1][1][i.square_];
+        } else if (bishops_.get(i)) {
+            hash ^= PieceKeys[1][2][i.square_];
+        } else if (rooks_.get(i)) {
+            hash ^= PieceKeys[1][3][i.square_];
+        } else if (queens_.get(i)) {
+            hash ^= PieceKeys[1][4][i.square_];
+        } else if (kings_.get(i)) {
+            hash ^= PieceKeys[1][5][i.square_];
+        }
+    }
+    if(!en_passant_.empty()) {
+        int en_passant_square = en_passant_.getLSB();
+        hash ^= EnPassantKeys[en_passant_square % 8];
+    }
+    if(castling_rights_ & 1) {
+        hash ^= CastleKeys[0];
+    }
+    if(castling_rights_ & 2) {
+        hash ^= CastleKeys[1];
+    }
+    if(castling_rights_ & 4) {
+        hash ^= CastleKeys[2];
+    }
+    if(castling_rights_ & 8) {
+        hash ^= CastleKeys[3];
+    }
+    if(player_ == Player::kPlayer1) {
+        hash ^= whiteToMoveKey;
+    }
+
+    return hash;
 }
 
 } // namespace minizero::env::chess

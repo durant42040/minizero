@@ -166,13 +166,31 @@ void ModeHandler::runZeroTrainingName()
 
 void ModeHandler::runEnvTest()
 {
-    Environment env("r3r1k1/pp3pbp/1qp1b1p1/2B5/2BP4/Q1n2N2/P4PPP/3R1K1R w - - 4 18");
+    Environment env;
     std::cout << env.toString() << std::endl;
 
-    std::cout << env.getLegalActions().size() << std::endl;
-    for (size_t i = 0; i < env.getLegalActions().size(); i++) {
-        std::cout << env.getLegalActions()[i].toConsoleString() << " ";
-    }
+    env.act({"W", "e2e4"});
+    std::cout << env.toString() << std::endl;
+    env.act({"B", "g8f6"});
+    std::cout << env.toString() << std::endl;
+    env.act({"W", "g1f3"});
+    std::cout << env.toString() << std::endl;
+    env.act({"B", "f6g8"});
+    std::cout << env.toString() << std::endl;
+    env.act({"W", "f3g1"});
+    std::cout << env.toString() << std::endl;
+    env.act({"B", "g8f6"});
+    std::cout << env.toString() << std::endl;
+    env.act({"W", "g1f3"});
+    std::cout << env.toString() << std::endl;
+    env.act({"B", "f6g8"});
+    std::cout << env.toString() << std::endl;
+    env.act({"W", "f3g1"});
+    std::cout << env.toString() << std::endl;
+    env.act({"B", "g8f6"});
+
+    std::cout << env.toString() << std::endl;
+    env.isTerminal();
 
     //    std::srand(std::time(0));
     //    while (!env.isTerminal()) {

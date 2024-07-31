@@ -9,6 +9,11 @@
 
 namespace minizero::env::chess {
 
+extern uint64_t PieceKeys[2][6][64];
+extern uint64_t CastleKeys[4];
+extern uint64_t EnPassantKeys[8];
+extern uint64_t whiteToMoveKey;
+
 const uint64_t kWhiteKingsideSquares = 0x0000000000000070;
 const uint64_t kWhiteQueensideSquares = 0x000000000000001C;
 const uint64_t kBlackKingsideSquares = 0x7000000000000000;
@@ -21,6 +26,8 @@ enum class GameState {
     BlackWin,
     Draw,
 };
+
+void initKeys();
 
 class ChessBoard {
 public:
@@ -48,6 +55,7 @@ public:
     void updateDrawCondition(Square from, Square to);
     void castling(Square from, Square to);
     void setFen(std::string fen);
+    uint64_t generateHash() const;
     inline Bitboard ourPieces(Player player) const
     {
         return player == Player::kPlayer1 ? white_pieces_ : black_pieces_;
@@ -67,6 +75,7 @@ public:
 
     GameState game_state_;
     Player player_;
+    std::vector<uint64_t> position_history_;
     uint8_t fifty_move_rule_;
     uint8_t castling_rights_;
     Bitboard en_passant_;

@@ -40,7 +40,7 @@ void generateActionString(int action_id);
 
 class ChessAction : public BaseAction {
 public:
-    ChessAction() : BaseAction(), from_(), to_(), promotion_('\0') {}
+    ChessAction() : BaseAction() {}
     ChessAction(int action_id, Player player);
     explicit ChessAction(const std::vector<std::string>& action_string_args);
     inline Player nextPlayer() const override { return getNextPlayer(getPlayer(), kChessNumPlayer); }
@@ -55,17 +55,19 @@ class ChessEnv : public BaseBoardEnv<ChessAction> {
 public:
     ChessEnv() : BaseBoardEnv<ChessAction>(kChessBoardSize)
     {
-        reset();
+        initKeys();
         initBishopMoves();
         initRookMoves();
+        reset();
     }
 
     ChessEnv(std::string fen) : BaseBoardEnv<ChessAction>(kChessBoardSize)
     {
-        reset();
-        setFen(fen);
+        initKeys();
         initBishopMoves();
         initRookMoves();
+        reset();
+        setFen(fen);
     }
 
     void reset() override;
@@ -80,15 +82,15 @@ public:
     float getEvalScore(bool is_resign = false) const override;
     std::vector<float> getFeatures(utils::Rotation rotation = utils::Rotation::kRotationNone) const override;
     std::vector<float> getActionFeatures(const ChessAction& action, utils::Rotation rotation = utils::Rotation::kRotationNone) const override;
-    inline int getNumInputChannels() const override { return 9; }
+    inline int getNumInputChannels() const override { return 12; }
     inline int getNumActionFeatureChannels() const override { return 0; }
     inline int getInputChannelHeight() const override { return kChessBoardSize; }
     inline int getInputChannelWidth() const override { return kChessBoardSize; }
     inline int getHiddenChannelHeight() const override { return kChessBoardSize; }
     inline int getHiddenChannelWidth() const override { return kChessBoardSize; }
-    inline int getPolicySize() const override { return getBoardSize() / 2 * 12; }
+    inline int getPolicySize() const override { return kChessActionSize; }
     std::string toString() const override;
-    inline std::string name() const override { return kChessName + std::to_string(getBoardSize()) + "x" + std::to_string(getBoardSize()); }
+    inline std::string name() const override { return kChessName + "_" + std::to_string(getBoardSize()) + "x" + std::to_string(getBoardSize()); }
     inline int getNumPlayer() const override { return kChessNumPlayer; }
 
     inline int getRotatePosition(int position, utils::Rotation rotation) const override { return position; };
@@ -101,8 +103,8 @@ class ChessEnvLoader : public BaseBoardEnvLoader<ChessAction, ChessEnv> {
 public:
     std::vector<float> getActionFeatures(const int pos, utils::Rotation rotation = utils::Rotation::kRotationNone) const override;
     inline std::vector<float> getValue(const int pos) const { return {getReturn()}; }
-    inline std::string name() const override { return kChessName + std::to_string(getBoardSize()) + "x" + std::to_string(getBoardSize()); }
-    inline int getPolicySize() const override { return getBoardSize() / 2 * 12; }
+    inline std::string name() const override { return kChessName + "_" + std::to_string(getBoardSize()) + "x" + std::to_string(getBoardSize()); }
+    inline int getPolicySize() const override { return kChessActionSize; }
     inline int getRotatePosition(int position, utils::Rotation rotation) const override { return position; }
     inline int getRotateAction(int action_id, utils::Rotation rotation) const override { return action_id; }
 };

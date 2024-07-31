@@ -48,8 +48,12 @@ void initialize()
 
 ChessAction::ChessAction(int action_id, Player player) : BaseAction(action_id, player)
 {
-    assert(action_id >= 0 && action_id < static_cast<int>(kChessActionName.size()));
-
+    if(action_id == -1) {
+        from_ = Square(-1);
+        to_ = Square(-1);
+        promotion_ = '\0';
+        return;
+    }
     std::string action_string = kChessActionName[action_id];
     from_ = Square(action_string.substr(0, 2));
     to_ = Square(action_string.substr(2, 2));
@@ -219,6 +223,7 @@ std::vector<ChessAction> ChessEnv::getLegalActions() const
         Bitboard moves = board_.generateLegalMoves(from);
 
         for (auto to : moves) {
+            // check if the move is a promotion
             if (board_.pawns_.get(from) && ((to.rank_ == 7) || (to.rank_ == 0))) {
                 for (int i = 0; i < 4; i++) {
                     int promotion_action_id = kPromotionActionID[from.square_][to.square_][i];
@@ -268,6 +273,13 @@ bool ChessEnv::isTerminal() const
 
 float ChessEnv::getEvalScore(bool is_resign) const
 {
+    if(is_resign) {
+        if(board_.player_ == Player::kPlayer1) {
+            return -1.0f;
+        } else if (board_.player_ == Player::kPlayer2) {
+            return 1.0f;
+        }
+    }
     if (board_.game_state_ == GameState::Draw) {
         return 0.0f;
     } else if (board_.game_state_ == GameState::WhiteWin) {
