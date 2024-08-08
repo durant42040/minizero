@@ -114,6 +114,7 @@ bool ChessBoard::act(Square from, Square to, char promotion, bool update)
     if (update) {
         updateGameState();
     }
+    fullmove_number_++;
 
     return true;
 }
@@ -300,13 +301,7 @@ void ChessBoard::updateGameState()
         game_state_ = GameState::Draw;
     }
     // check for three-fold repetition
-    int repetitions = 0;
-    for (int i = position_history_.size() - 3; i >= 0; i -= 2) {
-        if (position_history_[i] == position_history_.back()) {
-            repetitions++;
-        }
-    }
-    if (repetitions >= 2) {
+    if (getRepetitionCount() >= 2) {
         game_state_ = GameState::Draw;
     }
 }
@@ -449,10 +444,8 @@ void ChessBoard::setFen(std::string fen)
         en_passant_.set(Square(en_passant_string));
     }
 
-    // set halfmove clock
-    std::string halfmove_string = "0";
-    if (!fen_str.eof()) fen_str >> halfmove_string;
-    fifty_move_rule_ = std::stoi(halfmove_string);
+    if (!fen_str.eof()) fen_str >> fifty_move_rule_;
+    if (!fen_str.eof()) fen_str >> fullmove_number_;
 }
 
 uint64_t ChessBoard::generateHash() const
@@ -509,6 +502,37 @@ uint64_t ChessBoard::generateHash() const
     }
 
     return hash;
+}
+
+std::vector<uint64_t> ChessBoard::getPositionInfo() const
+{
+    std::vector<uint64_t> position;
+    position.push_back((white_pieces_ & pawns_).bitboard_);
+    position.push_back((black_pieces_ & pawns_).bitboard_);
+    position.push_back((white_pieces_ & bishops_).bitboard_);
+    position.push_back((black_pieces_ & bishops_).bitboard_);
+    position.push_back((white_pieces_ & rooks_).bitboard_);
+    position.push_back((black_pieces_ & rooks_).bitboard_);
+    position.push_back((white_pieces_ & queens_).bitboard_);
+    position.push_back((black_pieces_ & queens_).bitboard_);
+    position.push_back((white_pieces_ & kings_).bitboard_);
+    position.push_back((black_pieces_ & kings_).bitboard_);
+    position.push_back((white_pieces_ & knights_).bitboard_);
+    position.push_back((black_pieces_ & knights_).bitboard_);
+
+    int repetitions = getRepetitionCount();
+    if (repetitions == 0) {
+        position.push_back(0);
+        position.push_back(0);
+    } else if (repetitions == 1) {
+        position.push_back(1);
+        position.push_back(0);
+    } else {
+        position.push_back(1);
+        position.push_back(1);
+    }
+
+    return position;
 }
 
 } // namespace minizero::env::chess

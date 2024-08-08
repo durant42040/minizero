@@ -180,6 +180,7 @@ void ChessEnv::reset()
 void ChessEnv::setFen(const std::string& fen)
 {
     board_ = ChessBoard(fen);
+    position_history_.push_back(board_.getPositionInfo());
     actions_.clear();
     turn_ = board_.player_;
 }
@@ -191,6 +192,12 @@ bool ChessEnv::act(const ChessAction& action)
         turn_ = getNextPlayer(board_.player_, kChessNumPlayer);
         // default char with no promotion
         board_.act(action.from_, action.to_, action.promotion_);
+
+        position_history_.push_back(board_.getPositionInfo());
+        if (position_history_.size() > 8) {
+            position_history_.erase(position_history_.begin());
+        }
+
         return true;
     } else {
         // throw error
@@ -290,44 +297,24 @@ std::string ChessEnv::toString() const
 std::vector<float> ChessEnv::getFeatures(utils::Rotation rotation) const
 {
     std::vector<float> features;
-    for (int i = 0; i < 64; i++) {
-        features.push_back((board_.pawns_ & board_.white_pieces_).get(i));
-    }
-    for (int i = 0; i < 64; i++) {
-        features.push_back((board_.pawns_ & board_.black_pieces_).get(i));
-    }
-    for (int i = 0; i < 64; i++) {
-        features.push_back((board_.bishops_ & board_.white_pieces_).get(i));
-    }
-    for (int i = 0; i < 64; i++) {
-        features.push_back((board_.bishops_ & board_.black_pieces_).get(i));
-    }
-    for (int i = 0; i < 64; i++) {
-        features.push_back((board_.rooks_ & board_.white_pieces_).get(i));
-    }
-    for (int i = 0; i < 64; i++) {
-        features.push_back((board_.rooks_ & board_.black_pieces_).get(i));
-    }
-    for (int i = 0; i < 64; i++) {
-        features.push_back((board_.queens_ & board_.white_pieces_).get(i));
-    }
-    for (int i = 0; i < 64; i++) {
-        features.push_back((board_.queens_ & board_.black_pieces_).get(i));
-    }
-    for (int i = 0; i < 64; i++) {
-        features.push_back((board_.kings_ & board_.white_pieces_).get(i));
-    }
-    for (int i = 0; i < 64; i++) {
-        features.push_back((board_.kings_ & board_.black_pieces_).get(i));
-    }
-    for (int i = 0; i < 64; i++) {
-        features.push_back((board_.knights_ & board_.white_pieces_).get(i));
-    }
-    for (int i = 0; i < 64; i++) {
-        features.push_back((board_.knights_ & board_.black_pieces_).get(i));
-    }
-    for (int i = 0; i < 64; i++) {
-        features.push_back(board_.en_passant_.get(i));
+    for (auto position : position_history_) {
+        for (size_t i = 0; i < position.size() - 2; i++) {
+            for (int j = 0; j < 64; j++) {
+                if (position[i] & (1ULL << j))
+                    features.push_back(1.0f);
+                else
+                    features.push_back(0.0f);
+            }
+        }
+
+        int repetition_once = position[position.size() - 2];
+        for (int i = 0; i < 64; i++) {
+            features.push_back(repetition_once);
+        }
+        int repetition_twice = position[position.size() - 1];
+        for (int i = 0; i < 64; i++) {
+            features.push_back(repetition_twice);
+        }
     }
     for (int i = 0; i < 64; i++) {
         features.push_back((board_.castling_rights_ & 1) ? 1.0f : 0.0f);
@@ -342,13 +329,17 @@ std::vector<float> ChessEnv::getFeatures(utils::Rotation rotation) const
         features.push_back((board_.castling_rights_ & 8) ? 1.0f : 0.0f);
     }
     for (int i = 0; i < 64; i++) {
-        features.push_back(board_.fifty_move_rule_);
+        features.push_back(board_.fifty_move_rule_ / 2);
+    }
+    for (int i = 0; i < 64; i++) {
+        features.push_back(board_.fullmove_number_ / 2);
     }
     for (int i = 0; i < 64; i++) {
         features.push_back(board_.player_ == Player::kPlayer1 ? 1.0f : 0.0f);
     }
+
     for (int i = 0; i < 64; i++) {
-        features.push_back(1.0f);
+        std::cout << features[i] << " ";
     }
     return features;
 }

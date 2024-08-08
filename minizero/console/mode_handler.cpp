@@ -166,14 +166,33 @@ void ModeHandler::runZeroTrainingName()
 
 void ModeHandler::runEnvTest()
 {
-    Environment env;
-    env.reset();
-    while (!env.isTerminal()) {
-        std::vector<Action> legal_actions = env.getLegalActions();
-        int index = utils::Random::randInt() % legal_actions.size();
-        env.act(legal_actions[index]);
-        std::cout << env.toString();
-    }
+    Environment env("rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 2");
+    std::cout << env.getFeatures().size() << std::endl;
+    std::cout << env.toString();
+    env.act({"W", "d2d4"});
+    std::cout << env.getFeatures().size() << std::endl;
+    std::cout << env.toString();
+    env.act({"B", "e7e5"});
+    std::cout << env.getFeatures().size() << std::endl;
+    std::cout << env.toString();
+    env.act({"W", "d4e5"});
+    std::cout << env.getFeatures().size() << std::endl;
+    std::cout << env.toString();
+    env.act({"B", "a7a5"});
+    std::cout << env.getFeatures().size() << std::endl;
+    std::cout << env.toString();
+    env.act({"W", "e5e6"});
+    std::cout << env.getFeatures().size() << std::endl;
+    std::cout << env.toString();
+    env.act({"B", "b8c6"});
+    std::cout << env.getFeatures().size() << std::endl;
+    std::cout << env.toString();
+    env.act({"W", "a2a4"});
+    std::cout << env.getFeatures().size() << std::endl;
+    std::cout << env.toString();
+    env.act({"B", "b7b5"});
+    std::cout << env.getFeatures().size() << std::endl;
+    std::cout << env.toString();
 
     EnvironmentLoader env_loader;
     env_loader.loadFromEnvironment(env);

@@ -51,6 +51,7 @@ public:
     Bitboard generateMoves(Square square) const;
     // remove moves from generateMoves that would leave the king in check
     Bitboard generateLegalMoves(Square square) const;
+    std::vector<uint64_t> getPositionInfo() const;
     void updateGameState();
     void updateDrawCondition(Square from, Square to);
     void castling(Square from, Square to);
@@ -72,11 +73,22 @@ public:
     {
         return theirPieces(player_);
     }
+    inline int getRepetitionCount() const
+    {
+        int repetitions = 0;
+        for (int i = position_history_.size() - 3; i >= 0; i -= 2) {
+            if (position_history_[i] == position_history_.back()) {
+                repetitions++;
+            }
+        }
+        return repetitions;
+    }
 
     GameState game_state_;
     Player player_;
     std::vector<uint64_t> position_history_;
     uint8_t fifty_move_rule_;
+    uint8_t fullmove_number_;
     uint8_t castling_rights_;
     Bitboard en_passant_;
 

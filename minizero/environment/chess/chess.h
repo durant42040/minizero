@@ -60,10 +60,6 @@ public:
 
     ChessEnv(std::string fen) : BaseBoardEnv<ChessAction>(kChessBoardSize)
     {
-        initKeys();
-        initBishopMoves();
-        initRookMoves();
-        reset();
         setFen(fen);
     }
 
@@ -94,6 +90,7 @@ public:
     inline int getRotateAction(int action_id, utils::Rotation rotation) const override { return action_id; };
 
     ChessBoard board_;
+    std::vector<std::vector<uint64_t>> position_history_;
 };
 
 class ChessEnvLoader : public BaseBoardEnvLoader<ChessAction, ChessEnv> {
