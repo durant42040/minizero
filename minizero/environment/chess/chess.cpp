@@ -12,26 +12,6 @@ std::unordered_map<std::string, int> kChessActionMap;
 int kChessActionID[64][64];
 int kPromotionActionID[64][64][4];
 
-std::string chessPlayerToString(Player p)
-{
-    switch (p) {
-        case Player::kPlayer1: return "W";
-        case Player::kPlayer2: return "B";
-        default: return "?";
-    }
-}
-
-Player chessCharToPlayer(char c)
-{
-    switch (c) {
-        case 'W':
-        case 'w': return Player::kPlayer1;
-        case 'B':
-        case 'b': return Player::kPlayer2;
-        default: return Player::kPlayerSize;
-    }
-}
-
 void initialize()
 {
     // compute action string and id mapping
@@ -44,11 +24,14 @@ void initialize()
         ChessAction action({"W", kChessActionName[i]});
         assert(static_cast<int>(i) == action.getActionID());
     }
+    initKeys();
+    initBishopMoves();
+    initRookMoves();
 }
 
 ChessAction::ChessAction(int action_id, Player player) : BaseAction(action_id, player)
 {
-    if(action_id == -1) {
+    if (action_id == -1) {
         from_ = Square(-1);
         to_ = Square(-1);
         promotion_ = '\0';
@@ -75,7 +58,7 @@ ChessAction::ChessAction(const std::vector<std::string>& action_string_args)
     assert(kChessActionMap.count(action_string));
 
     action_id_ = kChessActionMap[action_string];
-    player_ = chessCharToPlayer(action_string_args[0][0]);
+    player_ = charToPlayer(action_string_args[0][0]);
     from_ = Square(action_string.substr(0, 2));
     to_ = Square(action_string.substr(2, 2));
     // if action string contains promotion, set promotion piece
@@ -185,14 +168,20 @@ std::string ChessAction::toConsoleString() const
 // reconstruct the board
 void ChessEnv::reset()
 {
-    board_ = ChessBoard();
-    actions_.clear();
-    turn_ = Player::kPlayer1;
+    if (config::env_chess_initial_fen.size()) {
+        setFen(config::env_chess_initial_fen);
+    } else {
+        board_ = ChessBoard();
+        actions_.clear();
+        turn_ = Player::kPlayer1;
+    }
 }
 
 void ChessEnv::setFen(const std::string& fen)
 {
     board_ = ChessBoard(fen);
+    actions_.clear();
+    turn_ = board_.player_;
 }
 
 bool ChessEnv::act(const ChessAction& action)
@@ -204,6 +193,8 @@ bool ChessEnv::act(const ChessAction& action)
         board_.act(action.from_, action.to_, action.promotion_);
         return true;
     } else {
+        // throw error
+        assert(false);
         return false;
     }
 }
@@ -244,28 +235,24 @@ bool ChessEnv::isLegalAction(const ChessAction& action) const
     Square from = action.from_;
     Square to = action.to_;
 
-    if (board_.generateLegalMoves(from).get(to) && board_.ourPieces().get(from)) {
-        return true;
-    } else {
-        std::cout << "illegal move: " << action.toConsoleString() << std::endl;
+    // promotion from non-pawn piece is illegal
+    if (!board_.pawns_.get(from) && action.promotion_ != '\0') {
         return false;
     }
+
+    return board_.generateLegalMoves(from).get(to) && board_.ourPieces().get(from);
 }
 
 bool ChessEnv::isTerminal() const
 {
     switch (board_.game_state_) {
         case GameState::Playing:
-            std::cout << "playing" << std::endl;
             break;
         case GameState::WhiteWin:
-            std::cout << "white win" << std::endl;
             break;
         case GameState::BlackWin:
-            std::cout << "black win" << std::endl;
             break;
         case GameState::Draw:
-            std::cout << "draw" << std::endl;
             break;
     }
     return board_.game_state_ != GameState::Playing;
@@ -273,8 +260,8 @@ bool ChessEnv::isTerminal() const
 
 float ChessEnv::getEvalScore(bool is_resign) const
 {
-    if(is_resign) {
-        if(board_.player_ == Player::kPlayer1) {
+    if (is_resign) {
+        if (board_.player_ == Player::kPlayer1) {
             return -1.0f;
         } else if (board_.player_ == Player::kPlayer2) {
             return 1.0f;
@@ -304,40 +291,64 @@ std::vector<float> ChessEnv::getFeatures(utils::Rotation rotation) const
 {
     std::vector<float> features;
     for (int i = 0; i < 64; i++) {
-        features.push_back(board_.pawns_.get(i));
+        features.push_back((board_.pawns_ & board_.white_pieces_).get(i));
     }
     for (int i = 0; i < 64; i++) {
-        features.push_back(board_.bishops_.get(i));
+        features.push_back((board_.pawns_ & board_.black_pieces_).get(i));
     }
     for (int i = 0; i < 64; i++) {
-        features.push_back(board_.rooks_.get(i));
+        features.push_back((board_.bishops_ & board_.white_pieces_).get(i));
     }
     for (int i = 0; i < 64; i++) {
-        features.push_back(board_.queens_.get(i));
+        features.push_back((board_.bishops_ & board_.black_pieces_).get(i));
     }
     for (int i = 0; i < 64; i++) {
-        features.push_back(board_.kings_.get(i));
+        features.push_back((board_.rooks_ & board_.white_pieces_).get(i));
     }
     for (int i = 0; i < 64; i++) {
-        features.push_back(board_.knights_.get(i));
+        features.push_back((board_.rooks_ & board_.black_pieces_).get(i));
     }
     for (int i = 0; i < 64; i++) {
-        features.push_back(board_.white_pieces_.get(i));
+        features.push_back((board_.queens_ & board_.white_pieces_).get(i));
     }
     for (int i = 0; i < 64; i++) {
-        features.push_back(board_.black_pieces_.get(i));
+        features.push_back((board_.queens_ & board_.black_pieces_).get(i));
+    }
+    for (int i = 0; i < 64; i++) {
+        features.push_back((board_.kings_ & board_.white_pieces_).get(i));
+    }
+    for (int i = 0; i < 64; i++) {
+        features.push_back((board_.kings_ & board_.black_pieces_).get(i));
+    }
+    for (int i = 0; i < 64; i++) {
+        features.push_back((board_.knights_ & board_.white_pieces_).get(i));
+    }
+    for (int i = 0; i < 64; i++) {
+        features.push_back((board_.knights_ & board_.black_pieces_).get(i));
     }
     for (int i = 0; i < 64; i++) {
         features.push_back(board_.en_passant_.get(i));
     }
     for (int i = 0; i < 64; i++) {
-        features.push_back(board_.castling_rights_);
+        features.push_back((board_.castling_rights_ & 1) ? 1.0f : 0.0f);
+    }
+    for (int i = 0; i < 64; i++) {
+        features.push_back((board_.castling_rights_ & 2) ? 1.0f : 0.0f);
+    }
+    for (int i = 0; i < 64; i++) {
+        features.push_back((board_.castling_rights_ & 4) ? 1.0f : 0.0f);
+    }
+    for (int i = 0; i < 64; i++) {
+        features.push_back((board_.castling_rights_ & 8) ? 1.0f : 0.0f);
     }
     for (int i = 0; i < 64; i++) {
         features.push_back(board_.fifty_move_rule_);
     }
     for (int i = 0; i < 64; i++) {
         features.push_back(board_.player_ == Player::kPlayer1 ? 1.0f : 0.0f);
+    }
+    for (int i = 0; i < 64; i++) {
+        features.push_back(1.0f);
     }
     return features;
 }

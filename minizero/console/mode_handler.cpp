@@ -167,48 +167,26 @@ void ModeHandler::runZeroTrainingName()
 void ModeHandler::runEnvTest()
 {
     Environment env;
-    std::cout << env.toString() << std::endl;
-
-    env.act({"W", "e2e4"});
-    std::cout << env.toString() << std::endl;
-    env.act({"B", "g8f6"});
-    std::cout << env.toString() << std::endl;
-    env.act({"W", "g1f3"});
-    std::cout << env.toString() << std::endl;
-    env.act({"B", "f6g8"});
-    std::cout << env.toString() << std::endl;
-    env.act({"W", "f3g1"});
-    std::cout << env.toString() << std::endl;
-    env.act({"B", "g8f6"});
-    std::cout << env.toString() << std::endl;
-    env.act({"W", "g1f3"});
-    std::cout << env.toString() << std::endl;
-    env.act({"B", "f6g8"});
-    std::cout << env.toString() << std::endl;
-    env.act({"W", "f3g1"});
-    std::cout << env.toString() << std::endl;
-    env.act({"B", "g8f6"});
-
-    std::cout << env.toString() << std::endl;
-    env.isTerminal();
-
-    //    std::srand(std::time(0));
-    //    while (!env.isTerminal()) {
-    //        std::vector<Action> legal_actions = env.getLegalActions();
-    //
-    //        for (size_t i = 0; i < legal_actions.size(); i++) {
-    //            std::cout << legal_actions[i].toConsoleString() << " ";
-    //        }
-    //        std::cout << std::endl;
-    //
-    //        int index = std::rand() % legal_actions.size();
-    //        env.act(legal_actions[index]);
-    //        std::cout << env.toString() << std::endl;
-    //    }
+    env.reset();
+    while (!env.isTerminal()) {
+        std::vector<Action> legal_actions = env.getLegalActions();
+        int index = utils::Random::randInt() % legal_actions.size();
+        env.act(legal_actions[index]);
+        std::cout << env.toString();
+    }
 
     EnvironmentLoader env_loader;
     env_loader.loadFromEnvironment(env);
     std::cout << env_loader.toString() << std::endl;
+
+    //    Environment env;
+    //    env.reset();
+    //    std::cout << env.toString();
+    //    std::cout << env.getLegalActions().size() << std::endl;
+    //
+    //    EnvironmentLoader env_loader;
+    //    env_loader.loadFromEnvironment(env);
+    //    std::cout << env_loader.toString() << std::endl;
 }
 
 void ModeHandler::runRemoveObs()

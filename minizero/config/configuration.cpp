@@ -16,7 +16,7 @@ float actor_mcts_reward_discount = 1.0f;
 int actor_mcts_think_batch_size = 1;
 float actor_mcts_think_time_limit = 0;
 bool actor_mcts_value_rescale = false;
-char actor_mcts_value_flipping_player = 'W';
+char actor_mcts_value_flipping_player = 'B';
 bool actor_select_action_by_count = false;
 bool actor_select_action_by_softmax_count = true;
 float actor_select_action_softmax_temperature = 1.0f;
@@ -80,6 +80,7 @@ std::string env_gomoku_rule = "standard";
 bool env_gomoku_exactly_five_stones = true;
 bool env_hex_use_swap_rule = true;
 int env_rubiks_scramble_rotate = 5;
+std::string env_chess_initial_fen = "";
 
 void setConfiguration(ConfigureLoader& cl)
 {
@@ -173,6 +174,8 @@ void setConfiguration(ConfigureLoader& cl)
     cl.addParameter("env_gomoku_exactly_five_stones", env_gomoku_exactly_five_stones, "true for standard Gomoku; false for freestyle Gomoku (allow winning with more than five stones, i.e., an overline)", "Environment");
 #elif RUBIKS
     cl.addParameter("env_rubiks_scramble_rotate", env_rubiks_scramble_rotate, "the number random rotations from the initial state of a rubik's cube", "Enviroment");
+#elif CHESS
+    cl.addParameter("env_chess_initial_fen", env_chess_initial_fen, "the fen string of the initial state", "Enviroment");
 #endif
 
     // references

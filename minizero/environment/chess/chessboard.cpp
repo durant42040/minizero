@@ -13,7 +13,7 @@ using namespace minizero::utils;
 
 uint64_t PieceKeys[2][6][64] = {0};
 uint64_t CastleKeys[4] = {0};
-uint64_t EnPassantKeys[8]= {0};
+uint64_t EnPassantKeys[8] = {0};
 uint64_t whiteToMoveKey = 0;
 
 void initKeys()
@@ -67,31 +67,27 @@ std::string ChessBoard::toString(Square prev_move_from, Square prev_move_to) con
 
     std::ostringstream result;
     for (int i = 7; i >= 0; i--) {
+        result << i + 1 << "  ";
         for (int j = 0; j < 16; j++) {
-            if ((prev_move_from == i * 8 + j / 2 || prev_move_to == i * 8 + j / 2) && (board[i * 16 + j] != ' ')) {
-                result << getColorText(std::string() + board[i * 16 + j], TextType::kBold, TextColor::kRed, TextColor::kSize);
+            if ((prev_move_from == i * 8 + j / 2 || prev_move_to == i * 8 + j / 2) && j % 2 == 0) {
+                if (white_pieces_.get(i * 8 + j / 2)) {
+                    result << getColorText(std::string() + board[i * 16 + j], TextType::kBold, TextColor::kSize, TextColor::kGreen);
+                } else if (black_pieces_.get(i * 8 + j / 2)) {
+                    result << getColorText(std::string() + board[i * 16 + j], TextType::kBold, TextColor::kBlue, TextColor::kGreen);
+                } else {
+                    result << getColorText(std::string() + board[i * 16 + j], TextType::kBold, TextColor::kSize, TextColor::kGreen);
+                }
+            } else if (white_pieces_.get(i * 8 + j / 2)) {
+                result << getColorText(std::string() + board[i * 16 + j], TextType::kBold, TextColor::kSize, TextColor::kSize);
+            } else if (black_pieces_.get(i * 8 + j / 2)) {
+                result << getColorText(std::string() + board[i * 16 + j], TextType::kBold, TextColor::kBlue, TextColor::kSize);
             } else {
                 result << board[i * 16 + j];
             }
         }
     }
 
-    result << "Player: " << (player_ == Player::kPlayer1 ? "White" : "Black") << "\n";
-    result << "In Check: " << (isPlayerInCheck(player_) ? "Yes" : "No") << "\n";
-    // get castling rights
-    result << "Castling rights: ";
-    if (castling_rights_ & 1) {
-        result << "K";
-    }
-    if (castling_rights_ & 2) {
-        result << "Q";
-    }
-    if (castling_rights_ & 4) {
-        result << "k";
-    }
-    if (castling_rights_ & 8) {
-        result << "q";
-    }
+    result << "   a b c d e f g h\n\n";
 
     return result.str();
 }
@@ -285,7 +281,6 @@ void ChessBoard::updateGameState()
     if (all_moves.empty()) {
         if (isPlayerInCheck(player_)) {
             // Checkmate
-            std::cout << "Checkmate" << std::endl;
             if (player_ == Player::kPlayer1) {
                 game_state_ = GameState::BlackWin;
             } else if (player_ == Player::kPlayer2) {
@@ -293,18 +288,15 @@ void ChessBoard::updateGameState()
             }
         } else {
             // Stalemate
-            std::cout << "Stalemate" << std::endl;
             game_state_ = GameState::Draw;
         }
     }
     // Insufficient material
     if (!hasMatingMaterial()) {
-        std::cout << "Insufficient material" << std::endl;
         game_state_ = GameState::Draw;
     }
     // 50-move rule
-    if (fifty_move_rule_ == 50) {
-        std::cout << "50-move rule" << std::endl;
+    if (fifty_move_rule_ == 100) {
         game_state_ = GameState::Draw;
     }
     // check for three-fold repetition
@@ -315,7 +307,6 @@ void ChessBoard::updateGameState()
         }
     }
     if (repetitions >= 2) {
-        std::cout << "Three-fold repetition" << std::endl;
         game_state_ = GameState::Draw;
     }
 }
@@ -349,7 +340,7 @@ void ChessBoard::updateDrawCondition(Square from, Square to)
 
 void ChessBoard::castling(Square from, Square to)
 {
-    // remove castling rights if king or rook is moved
+    // remove castling rights if king or rook is moved or captured
     if (from == 0 || to == 0) {
         castling_rights_ &= ~2;
     } else if (from == 7 || to == 7) {
@@ -464,9 +455,10 @@ void ChessBoard::setFen(std::string fen)
     fifty_move_rule_ = std::stoi(halfmove_string);
 }
 
-uint64_t ChessBoard::generateHash() const {
+uint64_t ChessBoard::generateHash() const
+{
     uint64_t hash = 0;
-    for(auto i : white_pieces_) {
+    for (auto i : white_pieces_) {
         if (pawns_.get(i)) {
             hash ^= PieceKeys[0][0][i.square_];
         } else if (knights_.get(i)) {
@@ -481,7 +473,7 @@ uint64_t ChessBoard::generateHash() const {
             hash ^= PieceKeys[0][5][i.square_];
         }
     }
-    for(auto i : black_pieces_) {
+    for (auto i : black_pieces_) {
         if (pawns_.get(i)) {
             hash ^= PieceKeys[1][0][i.square_];
         } else if (knights_.get(i)) {
@@ -496,23 +488,23 @@ uint64_t ChessBoard::generateHash() const {
             hash ^= PieceKeys[1][5][i.square_];
         }
     }
-    if(!en_passant_.empty()) {
+    if (!en_passant_.empty()) {
         int en_passant_square = en_passant_.getLSB();
         hash ^= EnPassantKeys[en_passant_square % 8];
     }
-    if(castling_rights_ & 1) {
+    if (castling_rights_ & 1) {
         hash ^= CastleKeys[0];
     }
-    if(castling_rights_ & 2) {
+    if (castling_rights_ & 2) {
         hash ^= CastleKeys[1];
     }
-    if(castling_rights_ & 4) {
+    if (castling_rights_ & 4) {
         hash ^= CastleKeys[2];
     }
-    if(castling_rights_ & 8) {
+    if (castling_rights_ & 8) {
         hash ^= CastleKeys[3];
     }
-    if(player_ == Player::kPlayer1) {
+    if (player_ == Player::kPlayer1) {
         hash ^= whiteToMoveKey;
     }
 

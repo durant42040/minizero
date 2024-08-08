@@ -55,9 +55,6 @@ class ChessEnv : public BaseBoardEnv<ChessAction> {
 public:
     ChessEnv() : BaseBoardEnv<ChessAction>(kChessBoardSize)
     {
-        initKeys();
-        initBishopMoves();
-        initRookMoves();
         reset();
     }
 
@@ -82,7 +79,7 @@ public:
     float getEvalScore(bool is_resign = false) const override;
     std::vector<float> getFeatures(utils::Rotation rotation = utils::Rotation::kRotationNone) const override;
     std::vector<float> getActionFeatures(const ChessAction& action, utils::Rotation rotation = utils::Rotation::kRotationNone) const override;
-    inline int getNumInputChannels() const override { return 12; }
+    inline int getNumInputChannels() const override { return 20; }
     inline int getNumActionFeatureChannels() const override { return 0; }
     inline int getInputChannelHeight() const override { return kChessBoardSize; }
     inline int getInputChannelWidth() const override { return kChessBoardSize; }
