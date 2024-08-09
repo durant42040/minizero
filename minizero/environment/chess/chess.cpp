@@ -247,6 +247,11 @@ bool ChessEnv::isLegalAction(const ChessAction& action) const
         return false;
     }
 
+    // non-promotion move to promotion square is illegal:q
+    if(board_.pawns_.get(from) && (to.rank_ == 7 || to.rank_ == 0) && action.promotion_ == '\0') {
+        return false;
+    }
+
     return board_.generateLegalMoves(from).get(to) && board_.ourPieces().get(from);
 }
 
@@ -338,9 +343,6 @@ std::vector<float> ChessEnv::getFeatures(utils::Rotation rotation) const
         features.push_back(board_.player_ == Player::kPlayer1 ? 1.0f : 0.0f);
     }
 
-    for (int i = 0; i < 64; i++) {
-        std::cout << features[i] << " ";
-    }
     return features;
 }
 
