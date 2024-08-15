@@ -1,5 +1,5 @@
 #include "chess.h"
-#include "move_generator.hpp"
+#include "move_generator.h"
 
 #include <iostream>
 #include <string>
@@ -25,8 +25,7 @@ void initialize()
         assert(static_cast<int>(i) == action.getActionID());
     }
     initKeys();
-    initBishopMoves();
-    initRookMoves();
+    initSlidingMoves();
 }
 
 ChessAction::ChessAction(int action_id, Player player) : BaseAction(action_id, player)
@@ -40,6 +39,7 @@ ChessAction::ChessAction(int action_id, Player player) : BaseAction(action_id, p
     std::string action_string = kChessActionName[action_id];
     from_ = Square(action_string.substr(0, 2));
     to_ = Square(action_string.substr(2, 2));
+
     // if action string contains promotion, set promotion piece
     if (action_string.size() == 5) {
         promotion_ = action_string[4];
@@ -199,11 +199,9 @@ bool ChessEnv::act(const ChessAction& action)
         }
 
         return true;
-    } else {
-        // throw error
-        assert(false);
-        return false;
     }
+
+    return false;
 }
 
 // action_string_args: {player, action_string}, e.g. {"W", "a1b1"}
@@ -248,7 +246,7 @@ bool ChessEnv::isLegalAction(const ChessAction& action) const
     }
 
     // non-promotion move to promotion square is illegal:q
-    if(board_.pawns_.get(from) && (to.rank_ == 7 || to.rank_ == 0) && action.promotion_ == '\0') {
+    if (board_.pawns_.get(from) && (to.rank_ == 7 || to.rank_ == 0) && action.promotion_ == '\0') {
         return false;
     }
 
@@ -257,16 +255,6 @@ bool ChessEnv::isLegalAction(const ChessAction& action) const
 
 bool ChessEnv::isTerminal() const
 {
-    switch (board_.game_state_) {
-        case GameState::Playing:
-            break;
-        case GameState::WhiteWin:
-            break;
-        case GameState::BlackWin:
-            break;
-        case GameState::Draw:
-            break;
-    }
     return board_.game_state_ != GameState::Playing;
 }
 
@@ -302,13 +290,20 @@ std::string ChessEnv::toString() const
 std::vector<float> ChessEnv::getFeatures(utils::Rotation rotation) const
 {
     std::vector<float> features;
+
+    for (size_t i = 0; i < 8 - position_history_.size(); i++) {
+        for (int i = 0; i < 64 * 14; i++) {
+            features.push_back(0.0f);
+        }
+    }
     for (auto position : position_history_) {
         for (size_t i = 0; i < position.size() - 2; i++) {
             for (int j = 0; j < 64; j++) {
-                if (position[i] & (1ULL << j))
+                if (position[i] & (1ULL << j)) {
                     features.push_back(1.0f);
-                else
+                } else {
                     features.push_back(0.0f);
+                }
             }
         }
 

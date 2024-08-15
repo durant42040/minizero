@@ -1,6 +1,6 @@
 #pragma once
 
-#include "square.hpp"
+#include "square.h"
 
 #include <cstdint>
 #include <iostream>
@@ -8,6 +8,7 @@
 
 namespace minizero::env::chess {
 
+// iterator for every set bit in bitboard
 template <typename T>
 class BitIterator {
 public:

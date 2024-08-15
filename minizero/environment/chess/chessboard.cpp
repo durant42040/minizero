@@ -1,7 +1,7 @@
-#include "chessboard.hpp"
-#include "bitboard.hpp"
+#include "chessboard.h"
+#include "bitboard.h"
 #include "color_message.h"
-#include "move_generator.hpp"
+#include "move_generator.h"
 #include "random.h"
 
 #include <algorithm>
@@ -16,6 +16,7 @@ uint64_t CastleKeys[4] = {0};
 uint64_t EnPassantKeys[8] = {0};
 uint64_t whiteToMoveKey = 0;
 
+// generate key for position hash
 void initKeys()
 {
     for (int i = 0; i < 8; i++) {
@@ -221,6 +222,7 @@ Bitboard ChessBoard::generateLegalMoves(Square from) const
             Bitboard all_white_moves = Bitboard(0);
             for (auto from : white_pieces_) {
                 all_white_moves |= generateMoves(from);
+                // pawn attacks on castling squares even if no pieces are there
                 if (pawns_.get(from)) {
                     all_white_moves.set(from.square_ + 7);
                     all_white_moves.set(from.square_ + 9);
@@ -425,6 +427,7 @@ void ChessBoard::setFen(std::string fen)
     // set castling rights
     std::string castling_rights_string = "-";
     if (!fen_str.eof()) fen_str >> castling_rights_string;
+    castling_rights_ = 0;
     for (char c : castling_rights_string) {
         if (c == 'K') {
             castling_rights_ |= 1;

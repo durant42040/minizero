@@ -1,5 +1,5 @@
-#include "move_generator.hpp"
-#include "bitboard.hpp"
+#include "move_generator.h"
+#include "bitboard.h"
 namespace minizero::env::chess {
 
 const Bitboard kWhitePawnCaptures[64] = {
@@ -571,7 +571,7 @@ uint64_t getBlockers(int index, Bitboard mask)
     return blockers;
 }
 
-void initBishopMoves()
+void initSlidingMoves()
 {
     for (int square = 0; square < 64; square++) {
         for (int i = 0; i < (1 << kBishopShiftBits[square]); i++) {
@@ -580,10 +580,7 @@ void initBishopMoves()
             kBishopTable[square][key] = generateBishopMovesSlow(Square(square), Bitboard(blockers));
         }
     }
-}
 
-void initRookMoves()
-{
     for (int square = 0; square < 64; square++) {
         for (int i = 0; i < (1 << kRookShiftBits[square]); i++) {
             uint64_t blockers = getBlockers(i, kRookMasks[square]);

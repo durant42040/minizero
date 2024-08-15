@@ -1,8 +1,8 @@
 #pragma once
 
 #include "base_env.h"
-#include "bitboard.hpp"
-#include "move_generator.hpp"
+#include "bitboard.h"
+#include "move_generator.h"
 #include <iostream>
 #include <string>
 #include <vector>
@@ -87,9 +87,9 @@ public:
     GameState game_state_;
     Player player_;
     std::vector<uint64_t> position_history_;
-    uint8_t fifty_move_rule_;
-    uint8_t fullmove_number_;
-    uint8_t castling_rights_;
+    int fifty_move_rule_;
+    int fullmove_number_;
+    int castling_rights_;
     Bitboard en_passant_;
 
     Bitboard all_pieces_;

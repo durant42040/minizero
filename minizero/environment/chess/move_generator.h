@@ -1,7 +1,7 @@
 #pragma once
 
-#include "bitboard.hpp"
-#include "square.hpp"
+#include "bitboard.h"
+#include "square.h"
 namespace minizero::env::chess {
 
 extern const Bitboard kWhitePawnCaptures[64];
@@ -17,9 +17,7 @@ extern const int kBishopShiftBits[64];
 
 uint64_t getBlocker(int index, Bitboard mask);
 
-void initBishopMoves();
-
-void initRookMoves();
+void initSlidingMoves();
 
 Bitboard generateWhitePawnMoves(Square from, Bitboard all_pieces, Bitboard capture_pieces);
 

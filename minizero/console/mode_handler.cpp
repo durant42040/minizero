@@ -10,6 +10,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace minizero::console {
@@ -166,46 +167,23 @@ void ModeHandler::runZeroTrainingName()
 
 void ModeHandler::runEnvTest()
 {
-    Environment env("rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 2");
-    std::cout << env.getFeatures().size() << std::endl;
-    std::cout << env.toString();
-    env.act({"W", "d2d4"});
-    std::cout << env.getFeatures().size() << std::endl;
-    std::cout << env.toString();
-    env.act({"B", "e7e5"});
-    std::cout << env.getFeatures().size() << std::endl;
-    std::cout << env.toString();
-    env.act({"W", "d4e5"});
-    std::cout << env.getFeatures().size() << std::endl;
-    std::cout << env.toString();
-    env.act({"B", "a7a5"});
-    std::cout << env.getFeatures().size() << std::endl;
-    std::cout << env.toString();
-    env.act({"W", "e5e6"});
-    std::cout << env.getFeatures().size() << std::endl;
-    std::cout << env.toString();
-    env.act({"B", "b8c6"});
-    std::cout << env.getFeatures().size() << std::endl;
-    std::cout << env.toString();
-    env.act({"W", "a2a4"});
-    std::cout << env.getFeatures().size() << std::endl;
-    std::cout << env.toString();
-    env.act({"B", "b7b5"});
-    std::cout << env.getFeatures().size() << std::endl;
-    std::cout << env.toString();
-
     EnvironmentLoader env_loader;
-    env_loader.loadFromEnvironment(env);
-    std::cout << env_loader.toString() << std::endl;
+    env_loader.loadFromString("");
+    std::vector<std::pair<Action, minizero::utils::VectorMap<std::string, std::string>>> legal_actions = env_loader.getActionPairs();
+    Environment env("4k3/8/4K2R/8/8/8/8/8 b - - 0 1");
 
-    //    Environment env;
-    //    env.reset();
-    //    std::cout << env.toString();
-    //    std::cout << env.getLegalActions().size() << std::endl;
-    //
-    //    EnvironmentLoader env_loader;
-    //    env_loader.loadFromEnvironment(env);
-    //    std::cout << env_loader.toString() << std::endl;
+    std::cout << env.toString();
+    //    for(auto action : env.getLegalActions()) {
+    //        std::cout << action.toConsoleString() << std::endl;
+    //    }
+
+    for (const auto& a : legal_actions) {
+        env.act(a.first);
+        std::cout << a.first.toConsoleString() << std::endl;
+        std::cout << env.toString();
+    }
+    std::cout << env.isTerminal() << std::endl;
+    std::cout << env.getEvalScore() << std::endl;
 }
 
 void ModeHandler::runRemoveObs()

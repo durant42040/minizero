@@ -1,10 +1,10 @@
 #pragma once
 
 #include "base_env.h"
-#include "bitboard.hpp"
-#include "chessboard.hpp"
-#include "move_generator.hpp"
-#include "square.hpp"
+#include "bitboard.h"
+#include "chessboard.h"
+#include "move_generator.h"
+#include "square.h"
 
 #include <string>
 #include <unordered_map>
