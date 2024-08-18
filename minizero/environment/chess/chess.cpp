@@ -171,7 +171,9 @@ void ChessEnv::reset()
     if (config::env_chess_initial_fen.size()) {
         setFen(config::env_chess_initial_fen);
     } else {
+        position_history_.clear();
         board_ = ChessBoard();
+        position_history_.push_back(board_.getPositionInfo());
         actions_.clear();
         turn_ = Player::kPlayer1;
     }
@@ -179,6 +181,7 @@ void ChessEnv::reset()
 
 void ChessEnv::setFen(const std::string& fen)
 {
+    position_history_.clear();
     board_ = ChessBoard(fen);
     position_history_.push_back(board_.getPositionInfo());
     actions_.clear();
