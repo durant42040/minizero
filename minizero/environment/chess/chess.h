@@ -76,7 +76,7 @@ public:
     std::vector<float> getFeatures(utils::Rotation rotation = utils::Rotation::kRotationNone) const override;
     std::vector<float> getActionFeatures(const ChessAction& action, utils::Rotation rotation = utils::Rotation::kRotationNone) const override;
     inline int getNumInputChannels() const override { return 119; }
-    inline int getNumActionFeatureChannels() const override { return 0; }
+    inline int getNumActionFeatureChannels() const override { return 8; }
     inline int getInputChannelHeight() const override { return kChessBoardSize; }
     inline int getInputChannelWidth() const override { return kChessBoardSize; }
     inline int getHiddenChannelHeight() const override { return kChessBoardSize; }

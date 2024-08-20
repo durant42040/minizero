@@ -1,8 +1,11 @@
 #include "chess.h"
 #include "move_generator.h"
+#include "random.h"
 
 #include <iostream>
+#include <random>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace minizero::env::chess {
@@ -346,15 +349,46 @@ std::vector<float> ChessEnv::getFeatures(utils::Rotation rotation) const
 
 std::vector<float> ChessEnv::getActionFeatures(const ChessAction& action, utils::Rotation rotation) const
 {
-    std::cout << "getting action features..." << std::endl;
-    return {};
+    std::vector<float> action_features;
+    for (int i = 0; i < kChessBoardSize * kChessBoardSize; i++) {
+        action_features.push_back((action.from_ == i) ? 1.0f : 0.0f);
+    }
+    for (int i = 0; i < kChessBoardSize * kChessBoardSize; i++) {
+        action_features.push_back((action.to_ == i) ? 1.0f : 0.0f);
+    }
+    for (int i = 0; i < kChessBoardSize * kChessBoardSize; i++) {
+        action_features.push_back(1.0f);
+    }
+    for (int i = 0; i < kChessBoardSize * kChessBoardSize; i++) {
+        action_features.push_back((action.promotion_ == 'q') ? 1.0f : 0.0f);
+    }
+    for (int i = 0; i < kChessBoardSize * kChessBoardSize; i++) {
+        action_features.push_back((action.promotion_ == 'n') ? 1.0f : 0.0f);
+    }
+    for (int i = 0; i < kChessBoardSize * kChessBoardSize; i++) {
+        action_features.push_back((action.promotion_ == 'b') ? 1.0f : 0.0f);
+    }
+    for (int i = 0; i < kChessBoardSize * kChessBoardSize; i++) {
+        action_features.push_back((action.promotion_ == 'r') ? 1.0f : 0.0f);
+    }
+    for (int i = 0; i < kChessBoardSize * kChessBoardSize; i++) {
+        action_features.push_back((action.promotion_ == '\0') ? 1.0f : 0.0f);
+    }
+
+    return action_features;
 }
 
 
 std::vector<float> ChessEnvLoader::getActionFeatures(const int pos, utils::Rotation rotation) const
 {
-    std::cout << "getting action features..." << std::endl;
-    return {};
+    ChessAction action = action_pairs_[pos].first;
+    if (pos > static_cast<int>(action_pairs_.size())) {
+        int action_id = utils::Random::randInt() % kChessActionSize;
+        action = ChessAction(action_id, Player::kPlayer1);
+    }
+    ChessEnv env;
+
+    return env.getActionFeatures(action, rotation);
 }
 
 } // namespace minizero::env::chess

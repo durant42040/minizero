@@ -170,7 +170,7 @@ void ModeHandler::runEnvTest()
     EnvironmentLoader env_loader;
     env_loader.loadFromString("");
     std::vector<std::pair<Action, minizero::utils::VectorMap<std::string, std::string>>> legal_actions = env_loader.getActionPairs();
-    Environment env("4k3/8/4K2R/8/8/8/8/8 b - - 0 1");
+    Environment env("7k/8/8/8/8/8/KP6/8 b - - 0 1");
 
     std::cout << env.toString();
     //    for(auto action : env.getLegalActions()) {
