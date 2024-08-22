@@ -7,10 +7,7 @@
 #include "ostream_redirector.h"
 #include "random.h"
 #include "zero_server.h"
-#include <cstdlib>
-#include <ctime>
 #include <string>
-#include <utility>
 #include <vector>
 
 namespace minizero::console {
@@ -167,23 +164,18 @@ void ModeHandler::runZeroTrainingName()
 
 void ModeHandler::runEnvTest()
 {
-    EnvironmentLoader env_loader;
-    env_loader.loadFromString("");
-    std::vector<std::pair<Action, minizero::utils::VectorMap<std::string, std::string>>> legal_actions = env_loader.getActionPairs();
-    Environment env("7k/8/8/8/8/8/KP6/8 b - - 0 1");
-
-    std::cout << env.toString();
-    //    for(auto action : env.getLegalActions()) {
-    //        std::cout << action.toConsoleString() << std::endl;
-    //    }
-
-    for (const auto& a : legal_actions) {
-        env.act(a.first);
-        std::cout << a.first.toConsoleString() << std::endl;
-        std::cout << env.toString();
+    Environment env;
+    env.reset();
+    while (!env.isTerminal()) {
+        std::vector<Action> legal_actions = env.getLegalActions();
+        int index = utils::Random::randInt() % legal_actions.size();
+        env.act(legal_actions[index]);
     }
-    std::cout << env.isTerminal() << std::endl;
-    std::cout << env.getEvalScore() << std::endl;
+    std::cout << env.toString() << std::endl;
+
+    EnvironmentLoader env_loader;
+    env_loader.loadFromEnvironment(env);
+    std::cout << env_loader.toString() << std::endl;
 }
 
 void ModeHandler::runRemoveObs()

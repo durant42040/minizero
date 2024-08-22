@@ -55,7 +55,7 @@ std::string ChessBoard::toString(Square prev_move_from, Square prev_move_to) con
         } else {
             board += '.';
         }
-        if (black_pieces_.get(i)) {
+        if (white_pieces_.get(i)) {
             // convert last char to uppercase
             board.back() -= 32;
         }
@@ -72,11 +72,11 @@ std::string ChessBoard::toString(Square prev_move_from, Square prev_move_to) con
         for (int j = 0; j < 16; j++) {
             if ((prev_move_from == i * 8 + j / 2 || prev_move_to == i * 8 + j / 2) && j % 2 == 0) {
                 if (white_pieces_.get(i * 8 + j / 2)) {
-                    result << getColorText(std::string() + board[i * 16 + j], TextType::kBold, TextColor::kSize, TextColor::kGreen);
+                    result << getColorText(std::string() + board[i * 16 + j], TextType::kBold, TextColor::kWhite, TextColor::kGreen);
                 } else if (black_pieces_.get(i * 8 + j / 2)) {
                     result << getColorText(std::string() + board[i * 16 + j], TextType::kBold, TextColor::kBlue, TextColor::kGreen);
                 } else {
-                    result << getColorText(std::string() + board[i * 16 + j], TextType::kBold, TextColor::kSize, TextColor::kGreen);
+                    result << getColorText(std::string() + board[i * 16 + j], TextType::kBold, TextColor::kWhite, TextColor::kGreen);
                 }
             } else if (white_pieces_.get(i * 8 + j / 2)) {
                 result << getColorText(std::string() + board[i * 16 + j], TextType::kBold, TextColor::kSize, TextColor::kSize);
