@@ -571,6 +571,7 @@ uint64_t getBlockers(int index, Bitboard mask)
     return blockers;
 }
 
+// precompute magic bitboards for bishops and rooks
 void initSlidingMoves()
 {
     for (int square = 0; square < 64; square++) {

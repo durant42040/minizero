@@ -41,8 +41,10 @@ def sgf_to_pgn(sgf, output_path, fen=starting_fen):
     result = result_pattern.findall(sgf)[0]
     game.headers["Result"] = "1-0" if result == "1.0" else "0-1" if result == "-1.0" else "1/2-1/2"
 
+    # exports pgn to output_path
     new_pgn = open(output_path, "w", encoding="utf-8")
     exporter = chess.pgn.FileExporter(new_pgn)
     game.accept(exporter)
 
+    # return pgn
     return game

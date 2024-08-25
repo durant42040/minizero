@@ -35,6 +35,7 @@ void initKeys()
     whiteToMoveKey = utils::Random::randInt64();
 }
 
+// generate board string, white pieces are uppercase, black pieces are lowercase and blue.
 std::string ChessBoard::toString(Square prev_move_from, Square prev_move_to) const
 {
     std::string board;
@@ -112,6 +113,7 @@ bool ChessBoard::act(Square from, Square to, char promotion, bool update)
     position_history_.push_back(generateHash());
     player_ = getNextPlayer(player_, 2);
 
+    // this is false when move generation is filtering pins/checks
     if (update) {
         updateGameState();
     }
@@ -196,13 +198,14 @@ Bitboard ChessBoard::generateLegalMoves(Square from) const
             Bitboard all_black_moves = Bitboard(0);
             for (auto from : black_pieces_) {
                 all_black_moves |= generateMoves(from);
+                // pawn attacks on castling squares even if no pieces are there
                 if (pawns_.get(from)) {
                     all_black_moves.set(from.square_ + 7);
                     all_black_moves.set(from.square_ + 9);
                 }
             }
 
-            // can castle if no squares occupied or attacked between king and rook, and castling rights are set
+            // can castle if no squares are occupied or attacked between king and rook, and castling rights are true
             bool can_white_castle_kingside =
                 (all_black_moves & kWhiteKingsideSquares).empty() &&
                 (all_pieces_ & (kWhiteKingsideSquares & ~kings_)).empty() &&
@@ -248,10 +251,12 @@ Bitboard ChessBoard::generateLegalMoves(Square from) const
             }
         }
     }
+
     // remove moves that would put our king in check
     // e.g. pins, illegal king moves
     for (auto to : moves) {
         ChessBoard temp_board = *this;
+        // promotion would not be relevant here
         temp_board.act(from, to, '\0', false);
         if (temp_board.isPlayerInCheck(player_)) {
             moves.clear(to);
@@ -281,6 +286,7 @@ void ChessBoard::updateGameState()
     for (auto from : ourPieces()) {
         all_moves |= generateLegalMoves(from);
     }
+
     if (all_moves.empty()) {
         if (isPlayerInCheck(player_)) {
             // Checkmate

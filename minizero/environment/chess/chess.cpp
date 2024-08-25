@@ -64,6 +64,7 @@ ChessAction::ChessAction(const std::vector<std::string>& action_string_args)
     player_ = charToPlayer(action_string_args[0][0]);
     from_ = Square(action_string.substr(0, 2));
     to_ = Square(action_string.substr(2, 2));
+
     // if action string contains promotion, set promotion piece
     if (action_string.size() == 5) {
         promotion_ = action_string[4];
@@ -251,7 +252,7 @@ bool ChessEnv::isLegalAction(const ChessAction& action) const
         return false;
     }
 
-    // non-promotion move to promotion square is illegal:q
+    // non-promotion move to promotion square is illegal
     if (board_.pawns_.get(from) && (to.rank_ == 7 || to.rank_ == 0) && action.promotion_ == '\0') {
         return false;
     }
@@ -297,12 +298,15 @@ std::vector<float> ChessEnv::getFeatures(utils::Rotation rotation) const
 {
     std::vector<float> features;
 
+    // push last 8 positions
     for (size_t i = 0; i < 8 - position_history_.size(); i++) {
         for (int i = 0; i < 64 * 14; i++) {
             features.push_back(0.0f);
         }
     }
+
     for (auto position : position_history_) {
+        // push 14 feature planes
         for (size_t i = 0; i < position.size() - 2; i++) {
             for (int j = 0; j < 64; j++) {
                 if (position[i] & (1ULL << j)) {
@@ -322,6 +326,7 @@ std::vector<float> ChessEnv::getFeatures(utils::Rotation rotation) const
             features.push_back(repetition_twice);
         }
     }
+
     for (int i = 0; i < 64; i++) {
         features.push_back((board_.castling_rights_ & 1) ? 1.0f : 0.0f);
     }
@@ -356,6 +361,7 @@ std::vector<float> ChessEnv::getActionFeatures(const ChessAction& action, utils:
     for (int i = 0; i < kChessBoardSize * kChessBoardSize; i++) {
         action_features.push_back((action.to_ == i) ? 1.0f : 0.0f);
     }
+    // encode whether target square is on the board
     for (int i = 0; i < kChessBoardSize * kChessBoardSize; i++) {
         action_features.push_back(1.0f);
     }

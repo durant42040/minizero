@@ -22,7 +22,7 @@ const int kChessActionSize = 1968;
 extern std::vector<std::string> kChessActionName;
 extern std::unordered_map<std::string, int> kChessActionMap;
 extern int kChessActionID[64][64];
-// [from][to][piece]
+// stores action id of promotion [from][to][piece]
 extern int kPromotionActionID[64][64][4];
 
 const std::string kChessPositions[] = {
@@ -48,7 +48,7 @@ public:
 
     Square from_;
     Square to_;
-    char promotion_ = '\0';
+    char promotion_;
 };
 
 class ChessEnv : public BaseBoardEnv<ChessAction> {
@@ -90,6 +90,7 @@ public:
     inline int getRotateAction(int action_id, utils::Rotation rotation) const override { return action_id; };
 
     ChessBoard board_;
+    // used for input features
     std::vector<std::vector<uint64_t>> position_history_;
 };
 
