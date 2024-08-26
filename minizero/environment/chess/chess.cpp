@@ -95,31 +95,10 @@ void generateActionString(int action_id)
         end_rank += distance * ((direction % 4 == 2) ? 0 : ((direction > 2 && direction < 6) ? -1 : 1));
     } else if (move_id < 64) {
         // knight moves
-        if (move_id == 56) {
-            end_file += 1;
-            end_rank += 2;
-        } else if (move_id == 57) {
-            end_file += 2;
-            end_rank += 1;
-        } else if (move_id == 58) {
-            end_file += 2;
-            end_rank -= 1;
-        } else if (move_id == 59) {
-            end_file += 1;
-            end_rank -= 2;
-        } else if (move_id == 60) {
-            end_file -= 1;
-            end_rank -= 2;
-        } else if (move_id == 61) {
-            end_file -= 2;
-            end_rank -= 1;
-        } else if (move_id == 62) {
-            end_file -= 2;
-            end_rank += 1;
-        } else {
-            end_file -= 1;
-            end_rank += 2;
-        }
+        int end_file_idx[8] = {1, 2, 2, 1, -1, -2, -2, -1};
+        int end_rank_idx[8] = {2, 1, -1, -2, -2, -1, 1, 2};
+        end_file += end_file_idx[move_id - 56];
+        end_rank += end_rank_idx[move_id - 56];
     } else if (move_id < 76) {
         // promotion
         if (start_rank == 6) {
@@ -190,6 +169,11 @@ void ChessEnv::setFen(const std::string& fen)
     position_history_.push_back(board_.getPositionInfo());
     actions_.clear();
     turn_ = board_.player_;
+}
+
+std::string ChessEnv::getFen() const
+{
+    return board_.getFen();
 }
 
 bool ChessEnv::act(const ChessAction& action)
@@ -355,35 +339,30 @@ std::vector<float> ChessEnv::getFeatures(utils::Rotation rotation) const
 std::vector<float> ChessEnv::getActionFeatures(const ChessAction& action, utils::Rotation rotation) const
 {
     std::vector<float> action_features;
-    for (int i = 0; i < kChessBoardSize * kChessBoardSize; i++) {
+    for (int i = 0; i < getBoardSize() * getBoardSize(); i++) {
         action_features.push_back((action.from_ == i) ? 1.0f : 0.0f);
     }
-    for (int i = 0; i < kChessBoardSize * kChessBoardSize; i++) {
+    for (int i = 0; i < getBoardSize() * getBoardSize(); i++) {
         action_features.push_back((action.to_ == i) ? 1.0f : 0.0f);
     }
-    // encode whether target square is on the board
-    for (int i = 0; i < kChessBoardSize * kChessBoardSize; i++) {
-        action_features.push_back(1.0f);
-    }
-    for (int i = 0; i < kChessBoardSize * kChessBoardSize; i++) {
+    for (int i = 0; i < getBoardSize() * getBoardSize(); i++) {
         action_features.push_back((action.promotion_ == 'q') ? 1.0f : 0.0f);
     }
-    for (int i = 0; i < kChessBoardSize * kChessBoardSize; i++) {
+    for (int i = 0; i < getBoardSize() * getBoardSize(); i++) {
         action_features.push_back((action.promotion_ == 'n') ? 1.0f : 0.0f);
     }
-    for (int i = 0; i < kChessBoardSize * kChessBoardSize; i++) {
+    for (int i = 0; i < getBoardSize() * getBoardSize(); i++) {
         action_features.push_back((action.promotion_ == 'b') ? 1.0f : 0.0f);
     }
-    for (int i = 0; i < kChessBoardSize * kChessBoardSize; i++) {
+    for (int i = 0; i < getBoardSize() * getBoardSize(); i++) {
         action_features.push_back((action.promotion_ == 'r') ? 1.0f : 0.0f);
     }
-    for (int i = 0; i < kChessBoardSize * kChessBoardSize; i++) {
+    for (int i = 0; i < getBoardSize() * getBoardSize(); i++) {
         action_features.push_back((action.promotion_ == '\0') ? 1.0f : 0.0f);
     }
 
     return action_features;
 }
-
 
 std::vector<float> ChessEnvLoader::getActionFeatures(const int pos, utils::Rotation rotation) const
 {

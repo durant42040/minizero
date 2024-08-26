@@ -25,16 +25,6 @@ extern int kChessActionID[64][64];
 // stores action id of promotion [from][to][piece]
 extern int kPromotionActionID[64][64][4];
 
-const std::string kChessPositions[] = {
-    "a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1",
-    "a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2",
-    "a3", "b3", "c3", "d3", "e3", "f3", "g3", "h3",
-    "a4", "b4", "c4", "d4", "e4", "f4", "g4", "h4",
-    "a5", "b5", "c5", "d5", "e5", "f5", "g5", "h5",
-    "a6", "b6", "c6", "d6", "e6", "f6", "g6", "h6",
-    "a7", "b7", "c7", "d7", "e7", "f7", "g7", "h7",
-    "a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8"};
-
 void initialize();
 void generateActionString(int action_id);
 
@@ -53,18 +43,20 @@ public:
 
 class ChessEnv : public BaseBoardEnv<ChessAction> {
 public:
-    ChessEnv() : BaseBoardEnv<ChessAction>(kChessBoardSize)
+    ChessEnv() : BaseBoardEnv<ChessAction>(minizero::config::env_board_size)
     {
+        assert(getBoardSize() == kChessBoardSize);
         reset();
     }
 
-    ChessEnv(std::string fen) : BaseBoardEnv<ChessAction>(kChessBoardSize)
+    ChessEnv(std::string fen) : BaseBoardEnv<ChessAction>(minizero::config::env_board_size)
     {
         setFen(fen);
     }
 
     void reset() override;
     void setFen(const std::string& fen);
+    std::string getFen() const;
     bool act(const ChessAction& action) override;
     bool act(const std::vector<std::string>& action_string_args) override;
     std::vector<ChessAction> getLegalActions() const override;
@@ -76,11 +68,11 @@ public:
     std::vector<float> getFeatures(utils::Rotation rotation = utils::Rotation::kRotationNone) const override;
     std::vector<float> getActionFeatures(const ChessAction& action, utils::Rotation rotation = utils::Rotation::kRotationNone) const override;
     inline int getNumInputChannels() const override { return 119; }
-    inline int getNumActionFeatureChannels() const override { return 8; }
-    inline int getInputChannelHeight() const override { return kChessBoardSize; }
-    inline int getInputChannelWidth() const override { return kChessBoardSize; }
-    inline int getHiddenChannelHeight() const override { return kChessBoardSize; }
-    inline int getHiddenChannelWidth() const override { return kChessBoardSize; }
+    inline int getNumActionFeatureChannels() const override { return 7; }
+    inline int getInputChannelHeight() const override { return getBoardSize(); }
+    inline int getInputChannelWidth() const override { return getBoardSize(); }
+    inline int getHiddenChannelHeight() const override { return getBoardSize(); }
+    inline int getHiddenChannelWidth() const override { return getBoardSize(); }
     inline int getPolicySize() const override { return kChessActionSize; }
     std::string toString() const override;
     inline std::string name() const override { return kChessName + "_" + std::to_string(getBoardSize()) + "x" + std::to_string(getBoardSize()); }

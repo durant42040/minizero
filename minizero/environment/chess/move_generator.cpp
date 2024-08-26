@@ -2,6 +2,10 @@
 #include "bitboard.h"
 namespace minizero::env::chess {
 
+// references:
+//  1. Shallow-Blue; https://github.com/GunshipPenguin/shallow-blue
+//  2. LeelaChessZero: https://github.com/LeelaChessZero/lc0
+
 const Bitboard kWhitePawnCaptures[64] = {
     0x200ULL,
     0x500ULL,

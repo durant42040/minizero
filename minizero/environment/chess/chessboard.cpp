@@ -110,7 +110,7 @@ bool ChessBoard::act(Square from, Square to, char promotion, bool update)
     black_pieces_.update(from, to);
     all_pieces_.update(from, to);
 
-    position_history_.push_back(generateHash());
+    position_hash_history_.push_back(generateHash());
     player_ = getNextPlayer(player_, 2);
 
     // this is false when move generation is filtering pins/checks
@@ -455,6 +455,80 @@ void ChessBoard::setFen(std::string fen)
 
     if (!fen_str.eof()) fen_str >> fifty_move_rule_;
     if (!fen_str.eof()) fen_str >> fullmove_number_;
+}
+
+std::string ChessBoard::getFen() const
+{
+    std::string fen_string = "";
+    for (int rank = 7; rank >= 0; rank--) {
+        int empty_count = 0;
+        for (int file = 0; file < 8; file++) {
+            int square = rank * 8 + file;
+            if (pawns_.get(square)) {
+                if (empty_count > 0) {
+                    fen_string += std::to_string(empty_count);
+                    empty_count = 0;
+                }
+                fen_string += 'p';
+            } else if (knights_.get(square)) {
+                if (empty_count > 0) {
+                    fen_string += std::to_string(empty_count);
+                    empty_count = 0;
+                }
+                fen_string += 'n';
+            } else if (bishops_.get(square)) {
+                if (empty_count > 0) {
+                    fen_string += std::to_string(empty_count);
+                    empty_count = 0;
+                }
+                fen_string += 'b';
+            } else if (rooks_.get(square)) {
+                if (empty_count > 0) {
+                    fen_string += std::to_string(empty_count);
+                    empty_count = 0;
+                }
+                fen_string += 'r';
+            } else if (queens_.get(square)) {
+                if (empty_count > 0) {
+                    fen_string += std::to_string(empty_count);
+                    empty_count = 0;
+                }
+                fen_string += 'q';
+            } else if (kings_.get(square)) {
+                if (empty_count > 0) {
+                    fen_string += std::to_string(empty_count);
+                    empty_count = 0;
+                }
+                fen_string += 'k';
+            } else {
+                empty_count++;
+            }
+            if (white_pieces_.get(square)) {
+                fen_string.back() -= 32;
+            }
+        }
+        if (empty_count > 0) {
+            fen_string += std::to_string(empty_count);
+        }
+        if (rank > 0) {
+            fen_string += '/';
+        }
+    }
+
+    fen_string += " " + std::string(player_ == Player::kPlayer1 ? "w" : "b") + " ";
+
+    std::string castling_rights = "";
+    if (castling_rights_ & 1) castling_rights += 'K';
+    if (castling_rights_ & 2) castling_rights += 'Q';
+    if (castling_rights_ & 4) castling_rights += 'k';
+    if (castling_rights_ & 8) castling_rights += 'q';
+    if (castling_rights.empty()) castling_rights = "-";
+
+    fen_string += castling_rights + " ";
+    std::string en_passant = en_passant_.empty() ? "-" : kChessPositions[en_passant_.getLSB()];
+    fen_string += en_passant + " " + std::to_string(fifty_move_rule_) + " " + std::to_string((fullmove_number_ + 1) / 2);
+
+    return fen_string;
 }
 
 uint64_t ChessBoard::generateHash() const
